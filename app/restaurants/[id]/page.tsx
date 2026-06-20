@@ -717,10 +717,10 @@ export default async function RestaurantDetailPage({
                             className={`inline-flex rounded-full px-3 py-1.5 text-xs font-black ring-1 ${
                               isComplete
                                 ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
-                                : "bg-orange-50 text-orange-700 ring-orange-100"
+                                : "bg-emerald-50 text-emerald-700 ring-emerald-100"
                             }`}
                           >
-                            {isComplete ? "Semua selesai" : "Belum selesai"}
+                            {isComplete ? "Semua selesai" : "selesai"}
                           </span>
 
                           <Link
