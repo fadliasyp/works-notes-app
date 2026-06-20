@@ -80,9 +80,10 @@ type MaintenanceSession = {
 };
 
 function formatDate(dateValue: string | null) {
-  if (!dateValue) return "Belum diisi";
+  if (!dateValue) return "Belum ada perubahan";
 
   return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -202,8 +203,12 @@ export default async function RestaurantDetailPage({
       .eq("id", placeId);
 
     redirect(
-  withToast(`/restaurants/${placeId}`, "success", "Produk berhasil dihapus.")
-);
+      withToast(
+        `/restaurants/${placeId}`,
+        "success",
+        "Produk berhasil dihapus.",
+      ),
+    );
   }
 
   async function deleteMaintenance(formData: FormData) {
@@ -234,12 +239,12 @@ export default async function RestaurantDetailPage({
       .eq("id", placeId);
 
     redirect(
-  withToast(
-    `/restaurants/${placeId}?tab=maintenance`,
-    "success",
-    "Maintenance berhasil dihapus."
-  )
-);
+      withToast(
+        `/restaurants/${placeId}?tab=maintenance`,
+        "success",
+        "Maintenance berhasil dihapus.",
+      ),
+    );
   }
 
   async function toggleMaintenanceCheck(formData: FormData) {
