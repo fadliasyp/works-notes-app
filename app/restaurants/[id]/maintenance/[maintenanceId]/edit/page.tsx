@@ -34,15 +34,27 @@ type MaintenanceSession = {
   note: string | null;
 };
 
+type MaintenanceAssetMini = {
+  name: string | null;
+  description: string | null;
+};
+
 type MaintenanceCheck = {
   id: string;
   is_checked: boolean | null;
   checked_at: string | null;
-  maintenance_assets: {
-    name: string | null;
-    description: string | null;
-  } | null;
+  maintenance_assets: MaintenanceAssetMini[] | MaintenanceAssetMini | null;
 };
+
+function getMaintenanceAsset(check: MaintenanceCheck) {
+  if (!check.maintenance_assets) return null;
+
+  if (Array.isArray(check.maintenance_assets)) {
+    return check.maintenance_assets[0] || null;
+  }
+
+  return check.maintenance_assets;
+}
 
 function toNullableText(value: FormDataEntryValue | null) {
   if (!value) return null;
@@ -109,7 +121,7 @@ export default async function EditMaintenancePage({ params }: PageProps) {
 
   const place = placeData as Place;
   const maintenance = maintenanceData as MaintenanceSession;
-  const checks = (checksData || []) as MaintenanceCheck[];
+  const checks = (checksData || []) as unknown as MaintenanceCheck[];
 
   const checkedCount = checks.filter((check) => check.is_checked).length;
   const totalChecks = checks.length;
@@ -305,44 +317,47 @@ export default async function EditMaintenancePage({ params }: PageProps) {
 
               {checks.length > 0 ? (
                 <div className="mt-4 grid gap-3">
-                  {checks.map((check) => (
-                    <div
-                      key={check.id}
-                      className="rounded-[1.35rem] bg-white p-4 shadow-sm ring-1 ring-emerald-100"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ${
-                            check.is_checked
-                              ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
-                              : "bg-slate-50 text-slate-400 ring-slate-200"
-                          }`}
-                        >
-                          {check.is_checked ? (
-                            <CheckCircle2 size={18} />
-                          ) : (
-                            <Wrench size={18} />
-                          )}
-                        </div>
+                  {checks.map((check) => {
+                    const asset = getMaintenanceAsset(check);
 
-                        <div>
-                          <p className="font-black text-slate-950">
-                            {check.maintenance_assets?.name ||
-                              "Barang maintenance"}
-                          </p>
-                          <p className="mt-1 text-sm leading-6 text-slate-500">
-                            {check.is_checked
-                              ? `Sudah diceklis${
-                                  check.checked_at
-                                    ? ` pada ${formatDate(check.checked_at)}`
-                                    : ""
-                                }`
-                              : "Belum diceklis"}
-                          </p>
+                    return (
+                      <div
+                        key={check.id}
+                        className="rounded-[1.35rem] bg-white p-4 shadow-sm ring-1 ring-emerald-100"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ${
+                              check.is_checked
+                                ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+                                : "bg-slate-50 text-slate-400 ring-slate-200"
+                            }`}
+                          >
+                            {check.is_checked ? (
+                              <CheckCircle2 size={18} />
+                            ) : (
+                              <Wrench size={18} />
+                            )}
+                          </div>
+
+                          <div>
+                            <p className="font-black text-slate-950">
+                              {asset?.name || "Barang maintenance"}
+                            </p>
+                            <p className="mt-1 text-sm leading-6 text-slate-500">
+                              {check.is_checked
+                                ? `Sudah diceklis${
+                                    check.checked_at
+                                      ? ` pada ${formatDate(check.checked_at)}`
+                                      : ""
+                                  }`
+                                : "Belum diceklis"}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="mt-4 rounded-[1.35rem] bg-white p-4 text-sm leading-6 text-emerald-800 ring-1 ring-emerald-100">
