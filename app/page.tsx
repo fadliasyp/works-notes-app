@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -378,13 +379,13 @@ export default async function HomePage({ searchParams }: PageProps) {
                       <form action={deletePlace}>
                         <input type="hidden" name="place_id" value={place.id} />
 
-                        <button
-                          type="submit"
+                        <SubmitButton
+                          pendingText="Menghapus..."
                           className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-black text-red-600 ring-1 ring-red-100 transition hover:bg-red-100"
                         >
                           <Trash2 size={16} />
                           Hapus
-                        </button>
+                        </SubmitButton>
                       </form>
                     </div>
                   </div>

@@ -10,6 +10,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type PageProps = {
   params: Promise<{
@@ -381,13 +382,13 @@ export default async function EditMaintenancePage({ params }: PageProps) {
                 Batal
               </Link>
 
-              <button
-                type="submit"
+              <SubmitButton
+                pendingText="Menyimpan perubahan..."
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-700"
               >
                 <Save size={18} />
                 Simpan Perubahan
-              </button>
+              </SubmitButton>
             </div>
           </div>
         </form>

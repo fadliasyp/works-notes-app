@@ -10,6 +10,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type PageProps = {
   params: Promise<{
@@ -505,13 +506,13 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
               </div>
             </div>
 
-            <button
-              type="submit"
+            <SubmitButton
+              pendingText="Menyimpan..."
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-700 sm:w-auto"
             >
               <Save size={18} />
               Simpan Barang
-            </button>
+            </SubmitButton>
           </div>
         </form>
 
@@ -645,13 +646,13 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
                           />
                         </div>
 
-                        <button
-                          type="submit"
+                        <SubmitButton
+                          pendingText="Memproses..."
                           className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-700 sm:w-auto"
                         >
                           <Save size={18} />
                           Simpan Perubahan
-                        </button>
+                        </SubmitButton>
                       </form>
 
                       <form action={deleteAsset} className="mt-3">
@@ -663,13 +664,13 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
                           value={asset.image_path || ""}
                         />
 
-                        <button
-                          type="submit"
+                        <SubmitButton
+                          pendingText="Menghapus..."
                           className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-50 px-5 py-4 text-sm font-black text-red-600 ring-1 ring-red-100 transition hover:bg-red-100 sm:w-auto"
                         >
                           <Trash2 size={18} />
                           Hapus Barang
-                        </button>
+                        </SubmitButton>
                       </form>
                     </div>
                   </div>

@@ -15,6 +15,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type PageProps = {
   params: Promise<{
@@ -593,13 +594,13 @@ export default async function RestaurantDetailPage({
                             value={product.image_path || ""}
                           />
 
-                          <button
-                            type="submit"
+                          <SubmitButton
+                            pendingText="Menghapus..."
                             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-black text-red-600 ring-1 ring-red-100 transition hover:bg-red-100"
                           >
                             <Trash2 size={16} />
                             Hapus
-                          </button>
+                          </SubmitButton>
                         </form>
                       </div>
                     </div>
@@ -742,12 +743,12 @@ export default async function RestaurantDetailPage({
                               value={session.id}
                             />
 
-                            <button
-                              type="submit"
+                            <SubmitButton
+                              pendingText="Menghapus..."
                               className="inline-flex rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-600 ring-1 ring-red-100 transition hover:bg-red-100"
                             >
                               Hapus
-                            </button>
+                            </SubmitButton>
                           </form>
                         </div>
                       </div>
