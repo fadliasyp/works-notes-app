@@ -170,28 +170,13 @@ export default async function HomePage({ searchParams }: PageProps) {
                   Daftar Tempat
                 </h1>
 
-                <p className="mt-4 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-                  Kelola produk, quantity, volume, masa berlaku, dan jadwal
-                  maintenance dari setiap restoran atau tempat kerja dengan
-                  tampilan yang rapi dan mudah dipakai.
-                </p>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-3xl bg-white/10 p-4 ring-1 ring-white/15">
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                       Total Tempat
                     </p>
                     <p className="mt-2 text-3xl font-black text-white">
                       {allPlaces.length}
-                    </p>
-                  </div>
-
-                  <div className="rounded-3xl bg-white/10 p-4 ring-1 ring-white/15">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Hasil Tampil
-                    </p>
-                    <p className="mt-2 text-3xl font-black text-white">
-                      {places.length}
                     </p>
                   </div>
 
