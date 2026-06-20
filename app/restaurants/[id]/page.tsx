@@ -2,13 +2,16 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   CalendarDays,
   CheckCircle2,
   Circle,
   ClipboardList,
   MapPin,
   Package,
+  Settings,
   Store,
+  Trash2,
   Wrench,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -103,27 +106,34 @@ function getExpiryBadge(expiresAt: string | null) {
   if (daysLeft === null) {
     return {
       label: "Belum diisi",
-      className: "bg-slate-100 text-slate-600",
+      className: "bg-slate-100 text-slate-600 ring-slate-200",
     };
   }
 
   if (daysLeft < 0) {
     return {
       label: "Expired",
-      className: "bg-red-100 text-red-700",
+      className: "bg-red-50 text-red-700 ring-red-100",
+    };
+  }
+
+  if (daysLeft <= 3) {
+    return {
+      label: `${daysLeft} hari lagi`,
+      className: "bg-red-50 text-red-700 ring-red-100",
     };
   }
 
   if (daysLeft <= 10) {
     return {
       label: `${daysLeft} hari lagi`,
-      className: "bg-orange-100 text-orange-700",
+      className: "bg-orange-50 text-orange-700 ring-orange-100",
     };
   }
 
   return {
     label: `${daysLeft} hari lagi`,
-    className: "bg-emerald-100 text-emerald-700",
+    className: "bg-emerald-50 text-emerald-700 ring-emerald-100",
   };
 }
 
@@ -299,7 +309,7 @@ export default async function RestaurantDetailPage({
   if (productsError || maintenanceError) {
     return (
       <main className="min-h-screen bg-slate-100 p-6">
-        <div className="mx-auto max-w-5xl rounded-3xl bg-white p-6 shadow-sm">
+        <div className="mx-auto max-w-5xl rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <h1 className="text-xl font-bold text-red-600">
             Gagal mengambil data detail tempat
           </h1>
@@ -318,7 +328,7 @@ export default async function RestaurantDetailPage({
 
           <Link
             href="/"
-            className="mt-5 inline-flex rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+            className="mt-5 inline-flex rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white"
           >
             Kembali
           </Link>
@@ -331,59 +341,104 @@ export default async function RestaurantDetailPage({
   const products = (productsData || []) as Product[];
   const maintenanceSessions = (maintenanceData || []) as MaintenanceSession[];
 
+  const totalMaintenance = maintenanceSessions.length;
+  const totalProducts = products.length;
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-emerald-50 px-4 py-5 sm:px-6 lg:px-8">
-      <section className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#eef6ff_28%,#f8fafc_55%,#ecfeff_100%)] px-4 py-5 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
+          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
         >
           <ArrowLeft size={16} />
           Kembali ke daftar tempat
         </Link>
 
-        <div className="mt-5 overflow-hidden rounded-[2rem] bg-slate-950 text-white shadow-xl">
-          <div className="relative px-5 py-7 sm:px-8 sm:py-10">
-            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
-            <div className="absolute bottom-0 left-10 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl" />
+        <div className="mt-5 overflow-hidden rounded-[2.2rem] bg-slate-950 text-white shadow-2xl shadow-slate-300/60 ring-1 ring-white/10">
+          <div className="relative px-5 py-7 sm:px-8 sm:py-10 lg:px-10">
+            <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-blue-500/25 blur-3xl" />
+            <div className="absolute -bottom-20 left-8 h-56 w-56 rounded-full bg-emerald-400/20 blur-3xl" />
+            <div className="absolute bottom-0 right-24 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
 
-            <div className="relative">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-blue-100 ring-1 ring-white/15">
-                <Store size={14} />
-                Detail Tempat
+            <div className="relative grid gap-7 lg:grid-cols-[1fr_320px] lg:items-end">
+              <div>
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-blue-100 shadow-inner ring-1 ring-white/15">
+                  <Store size={15} />
+                  Detail Tempat
+                </div>
+
+                <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+                  {place.name}
+                </h1>
+
+                <div className="mt-5 grid gap-3 text-sm leading-7 text-slate-300 sm:grid-cols-2">
+                  <p className="flex gap-3">
+                    <MapPin className="mt-1 shrink-0 text-blue-200" size={18} />
+                    <span>{place.address || "Alamat belum diisi"}</span>
+                  </p>
+
+                  <p className="flex gap-3">
+                    <CalendarDays
+                      className="mt-1 shrink-0 text-emerald-200"
+                      size={18}
+                    />
+                    <span>
+                      Terakhir diubah: {formatDate(place.last_changed_at)}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="mt-5 inline-flex rounded-full bg-blue-500/15 px-5 py-2.5 text-sm font-black text-blue-100 ring-1 ring-blue-300/20">
+                  {place.city_highlight || "Kota belum diisi"}
+                </div>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                {place.name}
-              </h1>
+              <div className="rounded-[2rem] bg-white p-4 text-slate-950 shadow-xl shadow-black/10">
+                <div className="rounded-[1.5rem] bg-gradient-to-br from-blue-50 via-white to-emerald-50 p-5 ring-1 ring-slate-200">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                    Ringkasan Tempat
+                  </p>
 
-              <div className="mt-4 grid gap-3 text-sm text-slate-300 sm:grid-cols-2">
-                <p className="flex gap-2">
-                  <MapPin className="mt-0.5 shrink-0" size={17} />
-                  <span>{place.address || "Alamat belum diisi"}</span>
-                </p>
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100">
+                      <p className="text-3xl font-black text-slate-950">
+                        {totalProducts}
+                      </p>
+                      <p className="mt-1 text-xs font-bold text-slate-500">
+                        Produk
+                      </p>
+                    </div>
 
-                <p className="flex gap-2">
-                  <CalendarDays className="mt-0.5 shrink-0" size={17} />
-                  <span>
-                    Terakhir diubah: {formatDate(place.last_changed_at)}
-                  </span>
-                </p>
-              </div>
+                    <div className="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100">
+                      <p className="text-3xl font-black text-slate-950">
+                        {totalMaintenance}
+                      </p>
+                      <p className="mt-1 text-xs font-bold text-slate-500">
+                        Maintenance
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="mt-5 inline-flex rounded-full bg-blue-500/15 px-4 py-2 text-sm font-semibold text-blue-100 ring-1 ring-blue-300/20">
-                {place.city_highlight || "Kota belum diisi"}
+                  <Link
+                    href={`/restaurants/${place.id}/edit`}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3.5 text-sm font-black text-white transition hover:bg-slate-800"
+                  >
+                    Edit Tempat
+                    <ArrowRight size={17} />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 rounded-3xl bg-white/80 p-2 shadow-sm ring-1 ring-slate-200 backdrop-blur">
+        <div className="mt-5 grid grid-cols-2 gap-3 rounded-[2rem] bg-white/90 p-2 shadow-xl shadow-slate-200/70 ring-1 ring-slate-200 backdrop-blur">
           <Link
             href={`/restaurants/${place.id}`}
-            className={`flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold transition ${
+            className={`flex items-center justify-center gap-2 rounded-[1.5rem] px-4 py-4 text-sm font-black transition ${
               activeTab === "products"
-                ? "bg-slate-950 text-white shadow-sm"
+                ? "bg-slate-950 text-white shadow-lg shadow-slate-300"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
@@ -393,9 +448,9 @@ export default async function RestaurantDetailPage({
 
           <Link
             href={`/restaurants/${place.id}?tab=maintenance`}
-            className={`flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold transition ${
+            className={`flex items-center justify-center gap-2 rounded-[1.5rem] px-4 py-4 text-sm font-black transition ${
               activeTab === "maintenance"
-                ? "bg-slate-950 text-white shadow-sm"
+                ? "bg-slate-950 text-white shadow-lg shadow-slate-300"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
@@ -406,137 +461,174 @@ export default async function RestaurantDetailPage({
 
         {activeTab === "products" && (
           <>
-            <div className="mt-6 flex items-center justify-between gap-3">
+            <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-xl font-bold text-slate-950">Produk</h2>
-                <p className="mt-1 text-sm text-slate-500">
+                <h2 className="text-3xl font-black tracking-tight text-slate-950">
+                  Produk
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
                   Daftar produk yang terdaftar di tempat ini.
                 </p>
               </div>
 
               <Link
                 href={`/restaurants/${place.id}/products/new`}
-                className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-700"
               >
                 Tambah
+                <ArrowRight size={17} />
               </Link>
             </div>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => {
+            <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {products.map((product, index) => {
                 const expiryBadge = getExpiryBadge(product.expires_at);
                 const imageUrl = getProductImageUrl(product.image_path);
 
+                const gradients = [
+                  "from-blue-500 via-cyan-400 to-emerald-400",
+                  "from-emerald-500 via-teal-400 to-cyan-400",
+                  "from-violet-500 via-fuchsia-400 to-pink-400",
+                  "from-orange-500 via-amber-400 to-yellow-400",
+                ];
+
                 return (
-                  <div
+                  <article
                     key={product.id}
-                    className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-lg"
+                    className="group overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/60 ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-300/70"
                   >
-                    <div className="h-40 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-100 to-blue-50">
-                      {imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={product.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-slate-400">
-                          <Package size={42} />
+                    <div
+                      className={`h-2 bg-gradient-to-r ${
+                        gradients[index % gradients.length]
+                      }`}
+                    />
+
+                    <div className="p-5 sm:p-6">
+                      <div className="rounded-[1.6rem] bg-slate-50 p-3 ring-1 ring-slate-100">
+                        <div className="flex h-48 items-center justify-center overflow-hidden rounded-[1.25rem] bg-white sm:h-52">
+                          {imageUrl ? (
+                            <img
+                              src={imageUrl}
+                              alt={product.name}
+                              className="h-full w-full object-contain"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 text-slate-400">
+                              <Package size={44} />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-
-                    <div className="mt-4 flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-bold text-slate-950">
-                          {product.name}
-                        </h3>
-
-                        <p className="mt-1 text-sm text-slate-500">
-                          {place.name}
-                        </p>
                       </div>
 
-                      <span
-                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${expiryBadge.className}`}
-                      >
-                        {expiryBadge.label}
-                      </span>
-                    </div>
+                      <div className="mt-5 flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="line-clamp-2 text-2xl font-black tracking-tight text-slate-950">
+                            {product.name}
+                          </h3>
 
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                      <div className="rounded-2xl bg-slate-50 p-3">
-                        <p className="text-xs text-slate-500">Quantity</p>
-                        <p className="mt-1 text-lg font-bold text-slate-950">
-                          {product.quantity ?? 0}
-                        </p>
-                      </div>
+                          <p className="mt-1 text-sm font-semibold text-slate-500">
+                            {place.name}
+                          </p>
+                        </div>
 
-                      <div className="rounded-2xl bg-slate-50 p-3">
-                        <p className="text-xs text-slate-500">Volume</p>
-                        <p className="mt-1 text-lg font-bold text-slate-950">
-                          {product.volume_value ?? "-"}{" "}
-                          {product.volume_unit || ""}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 rounded-2xl bg-slate-50 p-3">
-                      <p className="text-xs text-slate-500">
-                        Masa berlaku produk
-                      </p>
-                      <p className="mt-1 font-bold text-slate-950">
-                        {formatDate(product.expires_at)}
-                      </p>
-                    </div>
-
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                      <Link
-                        href={`/restaurants/${place.id}/products/${product.id}/edit`}
-                        className="inline-flex items-center justify-center rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
-                      >
-                        Edit
-                      </Link>
-
-                      <form action={deleteProduct}>
-                        <input type="hidden" name="place_id" value={place.id} />
-                        <input
-                          type="hidden"
-                          name="product_id"
-                          value={product.id}
-                        />
-                        <input
-                          type="hidden"
-                          name="image_path"
-                          value={product.image_path || ""}
-                        />
-
-                        <button
-                          type="submit"
-                          className="w-full rounded-2xl bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100"
+                        <span
+                          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-black ring-1 ${expiryBadge.className}`}
                         >
-                          Hapus
-                        </button>
-                      </form>
+                          {expiryBadge.label}
+                        </span>
+                      </div>
+
+                      <div className="mt-5 grid grid-cols-2 gap-3">
+                        <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
+                          <p className="text-xs font-bold text-slate-500">
+                            Quantity
+                          </p>
+                          <p className="mt-2 text-2xl font-black text-slate-950">
+                            {product.quantity ?? 0}
+                          </p>
+                        </div>
+
+                        <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
+                          <p className="text-xs font-bold text-slate-500">
+                            Volume
+                          </p>
+                          <p className="mt-2 text-2xl font-black text-slate-950">
+                            {product.volume_value ?? "-"}{" "}
+                            {product.volume_unit || ""}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
+                        <p className="text-xs font-bold text-slate-500">
+                          Masa berlaku produk
+                        </p>
+                        <p className="mt-2 text-xl font-black text-slate-950">
+                          {formatDate(product.expires_at)}
+                        </p>
+                      </div>
+
+                      <div className="mt-5 grid grid-cols-2 gap-3">
+                        <Link
+                          href={`/restaurants/${place.id}/products/${product.id}/edit`}
+                          className="inline-flex items-center justify-center rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-200"
+                        >
+                          Edit
+                        </Link>
+
+                        <form action={deleteProduct}>
+                          <input
+                            type="hidden"
+                            name="place_id"
+                            value={place.id}
+                          />
+                          <input
+                            type="hidden"
+                            name="product_id"
+                            value={product.id}
+                          />
+                          <input
+                            type="hidden"
+                            name="image_path"
+                            value={product.image_path || ""}
+                          />
+
+                          <button
+                            type="submit"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-black text-red-600 ring-1 ring-red-100 transition hover:bg-red-100"
+                          >
+                            <Trash2 size={16} />
+                            Hapus
+                          </button>
+                        </form>
+                      </div>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>
 
             {products.length === 0 && (
-              <div className="mt-5 rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                  <Package size={28} />
+              <div className="mt-6 rounded-[2rem] bg-white p-8 text-center shadow-xl shadow-slate-200/60 ring-1 ring-slate-200">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                  <Package size={30} />
                 </div>
 
-                <h3 className="mt-4 text-lg font-bold text-slate-900">
+                <h3 className="mt-5 text-xl font-black text-slate-900">
                   Belum ada produk
                 </h3>
 
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
                   Produk untuk tempat ini belum ditambahkan.
                 </p>
+
+                <Link
+                  href={`/restaurants/${place.id}/products/new`}
+                  className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white transition hover:bg-blue-700"
+                >
+                  Tambah Produk
+                  <ArrowRight size={17} />
+                </Link>
               </div>
             )}
           </>
@@ -544,29 +636,31 @@ export default async function RestaurantDetailPage({
 
         {activeTab === "maintenance" && (
           <>
-            <div className="mt-6 flex items-center justify-between gap-3">
+            <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-xl font-bold text-slate-950">
+                <h2 className="text-3xl font-black tracking-tight text-slate-950">
                   Maintenance
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-2 text-sm leading-6 text-slate-600">
                   Checklist barang maintenance tetap dan catatan bulanan.
                 </p>
               </div>
 
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-3 sm:flex">
                 <Link
                   href={`/restaurants/${place.id}/maintenance-assets`}
-                  className="rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-4 text-sm font-black text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
                 >
-                  Kelola Barang
+                  <Settings size={17} />
+                  Kelola
                 </Link>
 
                 <Link
                   href={`/restaurants/${place.id}/maintenance/new`}
-                  className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-4 text-sm font-black text-white shadow-lg shadow-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-700"
                 >
                   Tambah
+                  <ArrowRight size={17} />
                 </Link>
               </div>
             </div>
@@ -586,198 +680,213 @@ export default async function RestaurantDetailPage({
                   (check) => check.is_checked,
                 ).length;
 
+                const isComplete =
+                  totalChecks > 0 && checkedCount === totalChecks;
+
                 return (
-                  <div
+                  <article
                     key={session.id}
-                    className="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200"
+                    className="overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/60 ring-1 ring-slate-200"
                   >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="flex gap-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-                          <ClipboardList size={24} />
+                    <div className="h-2 bg-gradient-to-r from-emerald-500 via-teal-400 to-blue-500" />
+
+                    <div className="p-5 sm:p-6">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="flex gap-4">
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                            <ClipboardList size={26} />
+                          </div>
+
+                          <div>
+                            <h3 className="text-2xl font-black tracking-tight text-slate-950">
+                              {session.title || "Maintenance Bulanan"}
+                            </h3>
+
+                            <p className="mt-1 text-sm font-black text-emerald-700">
+                              {formatDate(session.maintenance_date)}
+                            </p>
+
+                            <p className="mt-2 text-sm font-semibold text-slate-500">
+                              Selesai: {checkedCount} / {totalChecks} barang
+                            </p>
+                          </div>
                         </div>
 
-                        <div>
-                          <h3 className="text-lg font-bold text-slate-950">
-                            {session.title || "Maintenance Bulanan"}
-                          </h3>
-
-                          <p className="mt-1 text-sm font-semibold text-emerald-700">
-                            {formatDate(session.maintenance_date)}
-                          </p>
-
-                          <p className="mt-2 text-sm text-slate-500">
-                            Selesai: {checkedCount} / {totalChecks} barang
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 sm:justify-end">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                            totalChecks > 0 && checkedCount === totalChecks
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-orange-100 text-orange-700"
-                          }`}
-                        >
-                          {totalChecks > 0 && checkedCount === totalChecks
-                            ? "Semua selesai"
-                            : "Selesai"}
-                        </span>
-
-                        <Link
-                          href={`/restaurants/${place.id}/maintenance/${session.id}/edit`}
-                          className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 transition hover:bg-blue-100"
-                        >
-                          Edit
-                        </Link>
-
-                        <form action={deleteMaintenance}>
-                          <input
-                            type="hidden"
-                            name="place_id"
-                            value={place.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="maintenance_id"
-                            value={session.id}
-                          />
-
-                          <button
-                            type="submit"
-                            className="inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-600 transition hover:bg-red-100"
-                          >
-                            Hapus
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {sortedChecks.map((check) => {
-                        const asset = check.maintenance_assets;
-                        const isChecked = Boolean(check.is_checked);
-                        const imageUrl = getMaintenanceImageUrl(
-                          asset?.image_path || null,
-                        );
-
-                        return (
-                          <div
-                            key={check.id}
-                            className={`rounded-3xl p-4 ring-1 transition ${
-                              isChecked
-                                ? "bg-emerald-50 ring-emerald-200"
-                                : "bg-slate-50 ring-slate-200"
+                        <div className="flex flex-wrap gap-2 lg:justify-end">
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1.5 text-xs font-black ring-1 ${
+                              isComplete
+                                ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+                                : "bg-orange-50 text-orange-700 ring-orange-100"
                             }`}
                           >
-                            <div className="h-36 overflow-hidden rounded-2xl bg-white">
-                              {imageUrl ? (
-                                <img
-                                  src={imageUrl}
-                                  alt={asset?.name || "Barang maintenance"}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <div className="flex h-full items-center justify-center text-slate-400">
-                                  <Wrench size={36} />
+                            {isComplete ? "Semua selesai" : "Belum selesai"}
+                          </span>
+
+                          <Link
+                            href={`/restaurants/${place.id}/maintenance/${session.id}/edit`}
+                            className="inline-flex rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-700 ring-1 ring-blue-100 transition hover:bg-blue-100"
+                          >
+                            Edit
+                          </Link>
+
+                          <form action={deleteMaintenance}>
+                            <input
+                              type="hidden"
+                              name="place_id"
+                              value={place.id}
+                            />
+                            <input
+                              type="hidden"
+                              name="maintenance_id"
+                              value={session.id}
+                            />
+
+                            <button
+                              type="submit"
+                              className="inline-flex rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-600 ring-1 ring-red-100 transition hover:bg-red-100"
+                            >
+                              Hapus
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        {sortedChecks.map((check) => {
+                          const asset = check.maintenance_assets;
+                          const isChecked = Boolean(check.is_checked);
+                          const imageUrl = getMaintenanceImageUrl(
+                            asset?.image_path || null,
+                          );
+
+                          return (
+                            <div
+                              key={check.id}
+                              className={`rounded-[1.7rem] p-4 ring-1 transition ${
+                                isChecked
+                                  ? "bg-emerald-50 ring-emerald-200"
+                                  : "bg-slate-50 ring-slate-200"
+                              }`}
+                            >
+                              <div className="rounded-[1.35rem] bg-white p-3 ring-1 ring-slate-100">
+                                <div className="flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
+                                  {imageUrl ? (
+                                    <img
+                                      src={imageUrl}
+                                      alt={asset?.name || "Barang maintenance"}
+                                      className="h-full w-full object-contain"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-slate-400">
+                                      <Wrench size={36} />
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-
-                            <div className="mt-4 flex items-start justify-between gap-3">
-                              <div>
-                                <h4 className="font-bold text-slate-950">
-                                  {asset?.name || "Barang maintenance"}
-                                </h4>
-
-                                <p className="mt-1 text-sm leading-6 text-slate-600">
-                                  {asset?.description ||
-                                    "Tidak ada deskripsi barang."}
-                                </p>
-
-                                {check.checked_at && (
-                                  <p className="mt-2 text-xs font-semibold text-emerald-700">
-                                    Diceklis: {formatDate(check.checked_at)}
-                                  </p>
-                                )}
                               </div>
 
-                              <form action={toggleMaintenanceCheck}>
-                                <input
-                                  type="hidden"
-                                  name="place_id"
-                                  value={place.id}
-                                />
-                                <input
-                                  type="hidden"
-                                  name="check_id"
-                                  value={check.id}
-                                />
-                                <input
-                                  type="hidden"
-                                  name="next_checked"
-                                  value={isChecked ? "false" : "true"}
-                                />
+                              <div className="mt-4 flex items-start justify-between gap-3">
+                                <div>
+                                  <h4 className="text-lg font-black text-slate-950">
+                                    {asset?.name || "Barang maintenance"}
+                                  </h4>
 
-                                <button
-                                  type="submit"
-                                  className={`flex h-11 w-11 items-center justify-center rounded-2xl transition ${
-                                    isChecked
-                                      ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                                      : "bg-white text-slate-400 ring-1 ring-slate-200 hover:text-emerald-600"
-                                  }`}
-                                  aria-label={
-                                    isChecked
-                                      ? "Batalkan checklist"
-                                      : "Checklist barang"
-                                  }
-                                >
-                                  {isChecked ? (
-                                    <CheckCircle2 size={24} />
-                                  ) : (
-                                    <Circle size={24} />
+                                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                                    {asset?.description ||
+                                      "Tidak ada deskripsi barang."}
+                                  </p>
+
+                                  {check.checked_at && (
+                                    <p className="mt-2 text-xs font-black text-emerald-700">
+                                      Diceklis: {formatDate(check.checked_at)}
+                                    </p>
                                   )}
-                                </button>
-                              </form>
+                                </div>
+
+                                <form action={toggleMaintenanceCheck}>
+                                  <input
+                                    type="hidden"
+                                    name="place_id"
+                                    value={place.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="check_id"
+                                    value={check.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="next_checked"
+                                    value={isChecked ? "false" : "true"}
+                                  />
+
+                                  <button
+                                    type="submit"
+                                    className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${
+                                      isChecked
+                                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700"
+                                        : "bg-white text-slate-400 ring-1 ring-slate-200 hover:text-emerald-600"
+                                    }`}
+                                    aria-label={
+                                      isChecked
+                                        ? "Batalkan checklist"
+                                        : "Checklist barang"
+                                    }
+                                  >
+                                    {isChecked ? (
+                                      <CheckCircle2 size={25} />
+                                    ) : (
+                                      <Circle size={25} />
+                                    )}
+                                  </button>
+                                </form>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {totalChecks === 0 && (
-                      <div className="mt-5 rounded-3xl bg-slate-50 p-5 text-center text-sm text-slate-500 ring-1 ring-slate-200">
-                        Belum ada barang tetap untuk maintenance ini.
+                          );
+                        })}
                       </div>
-                    )}
 
-                    <div className="mt-5 rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200">
-                      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-                        Catatan Bulanan
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-700">
-                        {session.note || "Belum ada catatan bulanan."}
-                      </p>
+                      {totalChecks === 0 && (
+                        <div className="mt-5 rounded-[1.7rem] bg-slate-50 p-5 text-center text-sm font-semibold text-slate-500 ring-1 ring-slate-200">
+                          Belum ada barang tetap untuk maintenance ini.
+                        </div>
+                      )}
+
+                      <div className="mt-5 rounded-[1.7rem] bg-slate-50 p-5 ring-1 ring-slate-200">
+                        <p className="text-xs font-black uppercase tracking-wide text-slate-400">
+                          Catatan Bulanan
+                        </p>
+                        <p className="mt-2 text-sm leading-7 text-slate-700">
+                          {session.note || "Belum ada catatan bulanan."}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>
 
             {maintenanceSessions.length === 0 && (
-              <div className="mt-5 rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                  <Wrench size={28} />
+              <div className="mt-6 rounded-[2rem] bg-white p-8 text-center shadow-xl shadow-slate-200/60 ring-1 ring-slate-200">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                  <Wrench size={30} />
                 </div>
 
-                <h3 className="mt-4 text-lg font-bold text-slate-900">
+                <h3 className="mt-5 text-xl font-black text-slate-900">
                   Belum ada maintenance
                 </h3>
 
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
                   Tambahkan maintenance bulanan pertama untuk tempat ini.
                 </p>
+
+                <Link
+                  href={`/restaurants/${place.id}/maintenance/new`}
+                  className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-black text-white transition hover:bg-emerald-700"
+                >
+                  Tambah Maintenance
+                  <ArrowRight size={17} />
+                </Link>
               </div>
             )}
           </>
