@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
+import { withToast } from "@/lib/toast";
 
 type PageProps = {
   params: Promise<{
@@ -217,7 +218,13 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
       })
       .eq("id", placeId);
 
-    redirect(`/restaurants/${placeId}/maintenance-assets`);
+    redirect(
+      withToast(
+        `/restaurants/${placeId}/maintenance-assets`,
+        "success",
+        "Barang maintenance berhasil ditambahkan.",
+      ),
+    );
   }
 
   async function updateAsset(formData: FormData) {
@@ -277,7 +284,13 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
       })
       .eq("id", placeId);
 
-    redirect(`/restaurants/${placeId}/maintenance-assets`);
+    redirect(
+      withToast(
+        `/restaurants/${placeId}/maintenance-assets`,
+        "success",
+        "Barang maintenance berhasil diperbarui.",
+      ),
+    );
   }
 
   async function deleteAsset(formData: FormData) {
@@ -312,7 +325,13 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
       })
       .eq("id", placeId);
 
-    redirect(`/restaurants/${placeId}/maintenance-assets`);
+    redirect(
+      withToast(
+        `/restaurants/${placeId}/maintenance-assets`,
+        "success",
+        "Barang maintenance berhasil dihapus.",
+      ),
+    );
   }
 
   return (

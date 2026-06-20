@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
+import { withToast } from "@/lib/toast";
 
 type PageProps = {
   params: Promise<{
@@ -116,7 +117,13 @@ export default async function NewProductPage({ params }: PageProps) {
     const name = formData.get("name")?.toString().trim();
 
     if (!name) {
-      throw new Error("Nama produk wajib diisi.");
+      redirect(
+        withToast(
+          `/restaurants/${placeId}/products/new`,
+          "error",
+          "Nama produk wajib diisi.",
+        ),
+      );
     }
 
     const quantity = toNullableNumber(formData.get("quantity"));
@@ -142,9 +149,14 @@ export default async function NewProductPage({ params }: PageProps) {
     });
 
     if (error) {
-      throw new Error(error.message);
+      redirect(
+        withToast(
+          `/restaurants/${placeId}/products/new`,
+          "error",
+          error.message,
+        ),
+      );
     }
-
     await supabase
       .from("places")
       .update({
@@ -152,7 +164,13 @@ export default async function NewProductPage({ params }: PageProps) {
       })
       .eq("id", placeId);
 
-    redirect(`/restaurants/${placeId}`);
+    redirect(
+      withToast(
+        `/restaurants/${placeId}`,
+        "success",
+        "Produk berhasil ditambahkan.",
+      ),
+    );
   }
 
   return (

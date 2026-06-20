@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
+import { withToast } from "@/lib/toast";
 
 function toNullableText(value: FormDataEntryValue | null) {
   if (!value) return null;
@@ -49,7 +50,13 @@ export default async function NewPlacePage() {
       throw new Error(error?.message || "Gagal menambah tempat.");
     }
 
-    redirect(`/restaurants/${data.id}`);
+    redirect(
+      withToast(
+        `/restaurants/${data.id}`,
+        "success",
+        "Tempat berhasil ditambahkan.",
+      ),
+    );
   }
 
   return (

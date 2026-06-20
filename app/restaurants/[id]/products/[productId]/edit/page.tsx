@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
+import { withToast } from "@/lib/toast";
 
 type PageProps = {
   params: Promise<{
@@ -201,7 +202,13 @@ export default async function EditProductPage({ params }: PageProps) {
       })
       .eq("id", placeId);
 
-    redirect(`/restaurants/${placeId}`);
+    redirect(
+      withToast(
+        `/restaurants/${placeId}`,
+        "success",
+        "Produk berhasil diperbarui.",
+      ),
+    );
   }
 
   return (

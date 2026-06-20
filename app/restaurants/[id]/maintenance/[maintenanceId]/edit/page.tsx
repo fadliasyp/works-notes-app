@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
+import { withToast } from "@/lib/toast";
 
 type PageProps = {
   params: Promise<{
@@ -167,7 +168,13 @@ export default async function EditMaintenancePage({ params }: PageProps) {
       })
       .eq("id", placeId);
 
-    redirect(`/restaurants/${placeId}?tab=maintenance`);
+    redirect(
+      withToast(
+        `/restaurants/${placeId}?tab=maintenance`,
+        "success",
+        "Maintenance berhasil diperbarui.",
+      ),
+    );
   }
 
   return (
