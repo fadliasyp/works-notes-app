@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import imageCompression from "browser-image-compression";
+import { useRouter } from "next/navigation";
 
 export type GalleryImageItem = {
   id: string;
@@ -21,9 +22,14 @@ export type GalleryImageItem = {
   publicUrl: string;
 };
 
+type UploadResult = {
+  ok: boolean;
+  message: string;
+};
+
 type PlaceGalleryClientProps = {
   images: GalleryImageItem[];
-  uploadAction: (formData: FormData) => Promise<void>;
+  uploadAction: (formData: FormData) => Promise<UploadResult>;
   deleteAction: (formData: FormData) => void;
 };
 export function PlaceGalleryClient({
@@ -31,6 +37,11 @@ export function PlaceGalleryClient({
   uploadAction,
   deleteAction,
 }: PlaceGalleryClientProps) {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [selectedFileCount, setSelectedFileCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -48,18 +59,17 @@ export function PlaceGalleryClient({
   async function handleUpload(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const form = event.currentTarget;
-    const input = form.elements.namedItem("images") as HTMLInputElement | null;
+    const input = fileInputRef.current;
 
     if (!input?.files || input.files.length === 0) {
-      alert("Pilih foto terlebih dahulu.");
+      setUploadInfo("Pilih foto terlebih dahulu.");
       return;
     }
 
     const files = Array.from(input.files);
 
     if (files.length > 20) {
-      alert("Maksimal upload 20 foto sekaligus.");
+      setUploadInfo("Maksimal upload 20 foto sekaligus.");
       return;
     }
 
@@ -100,12 +110,28 @@ export function PlaceGalleryClient({
 
       setUploadInfo("Mengupload foto...");
 
-      await uploadAction(formData);
+      const result = await uploadAction(formData);
+
+      if (!result.ok) {
+        setUploadInfo(result.message || "Gagal upload foto.");
+        return;
+      }
+
+      formRef.current?.reset();
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      setSelectedFileCount(0);
+      setUploadInfo(result.message || "Foto berhasil diupload.");
+
+      router.refresh();
     } catch (error) {
       console.error(error);
-      alert("Gagal upload foto. Coba lagi.");
+      setUploadInfo("Gagal upload foto. Coba lagi.");
+    } finally {
       setIsUploading(false);
-      setUploadInfo("");
     }
   }
 
@@ -152,7 +178,7 @@ export function PlaceGalleryClient({
   return (
     <>
       <div className="rounded-[2rem] bg-white p-5 shadow-xl shadow-slate-200/60 ring-1 ring-slate-200 sm:p-7">
-        <form onSubmit={handleUpload} className="grid gap-4">
+        <form ref={formRef} onSubmit={handleUpload} className="grid gap-4">
           <div className="rounded-[1.8rem] bg-gradient-to-br from-blue-50 via-white to-emerald-50 p-5 ring-1 ring-slate-200">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white">
@@ -171,27 +197,36 @@ export function PlaceGalleryClient({
           </div>
 
           <input
+            ref={fileInputRef}
             name="images"
             type="file"
             accept="image/*"
             multiple
+            onChange={(event) =>
+              setSelectedFileCount(event.target.files?.length || 0)
+            }
             className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
           />
 
           <button
             type="submit"
-            disabled={isUploading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+            disabled={isUploading || selectedFileCount === 0}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
             {isUploading ? (
               <>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 Mengupload...
               </>
+            ) : selectedFileCount > 0 ? (
+              <>
+                <ImagePlus size={18} />
+                Upload {selectedFileCount} Foto
+              </>
             ) : (
               <>
                 <ImagePlus size={18} />
-                Upload Foto
+                Pilih Foto Dulu
               </>
             )}
           </button>
