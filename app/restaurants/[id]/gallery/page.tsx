@@ -7,6 +7,8 @@ import {
   PlaceGalleryClient,
 } from "@/components/PlaceGalleryClient";
 
+import { revalidatePath } from "next/cache";
+
 type PageProps = {
   params: Promise<{
     id: string;
@@ -92,7 +94,10 @@ export default async function PlaceGalleryPage({ params }: PageProps) {
     const files = formData.getAll("images");
 
     if (!placeId) {
-      throw new Error("ID tempat tidak ditemukan.");
+      return {
+        ok: false,
+        message: "ID tempat tidak ditemukan.",
+      };
     }
 
     const imageFiles = files.filter(
@@ -100,7 +105,10 @@ export default async function PlaceGalleryPage({ params }: PageProps) {
     );
 
     if (imageFiles.length === 0) {
-      redirect(`/restaurants/${placeId}/gallery`);
+      return {
+        ok: false,
+        message: "Pilih foto terlebih dahulu.",
+      };
     }
 
     const uploadedRows = [];
@@ -125,7 +133,10 @@ export default async function PlaceGalleryPage({ params }: PageProps) {
         .insert(uploadedRows);
 
       if (error) {
-        throw new Error(error.message);
+        return {
+          ok: false,
+          message: error.message,
+        };
       }
     }
 
@@ -136,7 +147,13 @@ export default async function PlaceGalleryPage({ params }: PageProps) {
       })
       .eq("id", placeId);
 
-    redirect(`/restaurants/${placeId}/gallery`);
+    revalidatePath(`/restaurants/${placeId}`);
+    revalidatePath(`/restaurants/${placeId}/gallery`);
+
+    return {
+      ok: true,
+      message: `${uploadedRows.length} foto berhasil diupload.`,
+    };
   }
 
   async function deleteImages(formData: FormData) {
@@ -284,7 +301,7 @@ export default async function PlaceGalleryPage({ params }: PageProps) {
             "use server";
 
             formData.set("place_id", id);
-            await uploadImages(formData);
+            return uploadImages(formData);
           }}
           deleteAction={deleteImages}
         />
