@@ -9,6 +9,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import imageCompression from "browser-image-compression";
 
 export type GalleryImageItem = {
   id: string;
@@ -22,10 +23,9 @@ export type GalleryImageItem = {
 
 type PlaceGalleryClientProps = {
   images: GalleryImageItem[];
-  uploadAction: (formData: FormData) => void;
+  uploadAction: (formData: FormData) => Promise<void>;
   deleteAction: (formData: FormData) => void;
 };
-
 export function PlaceGalleryClient({
   images,
   uploadAction,
@@ -34,6 +34,8 @@ export function PlaceGalleryClient({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadInfo, setUploadInfo] = useState("");
 
   const activeImage = activeIndex === null ? null : images[activeIndex];
 
@@ -42,6 +44,70 @@ export function PlaceGalleryClient({
   const selectedMap = useMemo(() => {
     return new Set(selectedIds);
   }, [selectedIds]);
+
+  async function handleUpload(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const input = form.elements.namedItem("images") as HTMLInputElement | null;
+
+    if (!input?.files || input.files.length === 0) {
+      alert("Pilih foto terlebih dahulu.");
+      return;
+    }
+
+    const files = Array.from(input.files);
+
+    if (files.length > 20) {
+      alert("Maksimal upload 20 foto sekaligus.");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadInfo("Menyiapkan foto...");
+
+    try {
+      const formData = new FormData();
+
+      for (let index = 0; index < files.length; index++) {
+        const file = files[index];
+
+        setUploadInfo(`Mengompres foto ${index + 1} dari ${files.length}...`);
+
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 0.85,
+          maxWidthOrHeight: 1800,
+          useWebWorker: true,
+          initialQuality: 0.86,
+          fileType: "image/jpeg",
+        });
+
+        const safeName = file.name
+          .replace(/\.[^/.]+$/, "")
+          .replace(/[^a-zA-Z0-9-_]/g, "-");
+
+        const finalFile = new File(
+          [compressedFile],
+          `${safeName || "foto"}.jpg`,
+          {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          },
+        );
+
+        formData.append("images", finalFile);
+      }
+
+      setUploadInfo("Mengupload foto...");
+
+      await uploadAction(formData);
+    } catch (error) {
+      console.error(error);
+      alert("Gagal upload foto. Coba lagi.");
+      setIsUploading(false);
+      setUploadInfo("");
+    }
+  }
 
   function toggleSelected(id: string) {
     setSelectedIds((current) =>
@@ -86,7 +152,7 @@ export function PlaceGalleryClient({
   return (
     <>
       <div className="rounded-[2rem] bg-white p-5 shadow-xl shadow-slate-200/60 ring-1 ring-slate-200 sm:p-7">
-        <form action={uploadAction} className="grid gap-4">
+        <form onSubmit={handleUpload} className="grid gap-4">
           <div className="rounded-[1.8rem] bg-gradient-to-br from-blue-50 via-white to-emerald-50 p-5 ring-1 ring-slate-200">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white">
@@ -114,11 +180,26 @@ export function PlaceGalleryClient({
 
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-700 sm:w-auto"
+            disabled={isUploading}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
           >
-            <ImagePlus size={18} />
-            Upload Foto
+            {isUploading ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Mengupload...
+              </>
+            ) : (
+              <>
+                <ImagePlus size={18} />
+                Upload Foto
+              </>
+            )}
           </button>
+          {isUploading && uploadInfo && (
+            <div className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 ring-1 ring-blue-100">
+              {uploadInfo}
+            </div>
+          )}
         </form>
       </div>
 
