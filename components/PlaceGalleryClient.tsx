@@ -41,6 +41,7 @@ export function PlaceGalleryClient({
   const formRef = useRef<HTMLFormElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const photoViewerHistoryRef = useRef(false);
+  const selectionHistoryRef = useRef(false);
 
   const [selectedFileCount, setSelectedFileCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -136,12 +137,51 @@ export function PlaceGalleryClient({
     }
   }
 
-  function toggleSelected(id: string) {
-    setSelectedIds((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id],
+  function openSelectionMode() {
+    if (selectionHistoryRef.current) return;
+
+    window.history.pushState(
+      {
+        gallerySelectionOpen: true,
+      },
+      "",
+      window.location.href,
     );
+
+    selectionHistoryRef.current = true;
+  }
+
+  function closeSelectionMode(fromBrowserBack = false) {
+    setSelectedIds([]);
+
+    if (!selectionHistoryRef.current) return;
+
+    selectionHistoryRef.current = false;
+
+    if (!fromBrowserBack) {
+      window.history.back();
+    }
+  }
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) => {
+      const next = current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id];
+
+      if (current.length === 0 && next.length > 0) {
+        openSelectionMode();
+      }
+
+      if (current.length > 0 && next.length === 0) {
+        if (selectionHistoryRef.current) {
+          selectionHistoryRef.current = false;
+          window.history.back();
+        }
+      }
+
+      return next;
+    });
   }
 
   function openPhotoViewer(index: number) {
@@ -176,12 +216,26 @@ export function PlaceGalleryClient({
     function handlePopState() {
       if (photoViewerHistoryRef.current) {
         closePhotoViewer(true);
+        return;
+      }
+
+      if (selectionHistoryRef.current) {
+        closeSelectionMode(true);
+        return;
       }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && photoViewerHistoryRef.current) {
+      if (event.key !== "Escape") return;
+
+      if (photoViewerHistoryRef.current) {
         closePhotoViewer();
+        return;
+      }
+
+      if (selectionHistoryRef.current) {
+        closeSelectionMode();
+        return;
       }
     }
 
@@ -193,10 +247,6 @@ export function PlaceGalleryClient({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
-  function clearSelected() {
-    setSelectedIds([]);
-  }
 
   function showPrevious() {
     if (activeIndex === null || images.length === 0) return;
@@ -303,7 +353,7 @@ export function PlaceGalleryClient({
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={clearSelected}
+              onClick={() => closeSelectionMode()}
               className="rounded-2xl bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm ring-1 ring-slate-200"
             >
               Batal
