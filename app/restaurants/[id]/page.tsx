@@ -41,7 +41,6 @@ type Product = {
   id: string;
   place_id: string;
   name: string;
-  image_path: string | null;
   quantity: number | null;
   volume_value: number | null;
   volume_unit: string | null;
@@ -55,7 +54,6 @@ type MaintenanceAsset = {
   place_id: string;
   name: string;
   description: string | null;
-  image_path: string | null;
   sort_order: number | null;
 };
 
@@ -140,26 +138,6 @@ function getExpiryBadge(expiresAt: string | null) {
   };
 }
 
-function getProductImageUrl(imagePath: string | null) {
-  if (!imagePath) return null;
-
-  const { data } = supabase.storage
-    .from("product-images")
-    .getPublicUrl(imagePath);
-
-  return data.publicUrl;
-}
-
-function getMaintenanceImageUrl(imagePath: string | null) {
-  if (!imagePath) return null;
-
-  const { data } = supabase.storage
-    .from("maintenance-images")
-    .getPublicUrl(imagePath);
-
-  return data.publicUrl;
-}
-
 export default async function RestaurantDetailPage({
   params,
   searchParams,
@@ -175,14 +153,9 @@ export default async function RestaurantDetailPage({
 
     const placeId = formData.get("place_id")?.toString();
     const productId = formData.get("product_id")?.toString();
-    const imagePath = formData.get("image_path")?.toString();
 
     if (!placeId || !productId) {
       throw new Error("ID tempat atau ID produk tidak ditemukan.");
-    }
-
-    if (imagePath) {
-      await supabase.storage.from("product-images").remove([imagePath]);
     }
 
     const { error } = await supabase
@@ -498,7 +471,6 @@ export default async function RestaurantDetailPage({
             <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {products.map((product, index) => {
                 const expiryBadge = getExpiryBadge(product.expires_at);
-                const imageUrl = getProductImageUrl(product.image_path);
 
                 const gradients = [
                   "from-blue-500 via-cyan-400 to-emerald-400",
@@ -519,22 +491,6 @@ export default async function RestaurantDetailPage({
                     />
 
                     <div className="p-5 sm:p-6">
-                      <div className="rounded-[1.6rem] bg-slate-50 p-3 ring-1 ring-slate-100">
-                        <div className="flex h-48 items-center justify-center overflow-hidden rounded-[1.25rem] bg-white sm:h-52">
-                          {imageUrl ? (
-                            <img
-                              src={imageUrl}
-                              alt={product.name}
-                              className="h-full w-full object-contain"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 text-slate-400">
-                              <Package size={44} />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
                       <div className="mt-5 flex items-start justify-between gap-3">
                         <div>
                           <h3 className="line-clamp-2 text-2xl font-black tracking-tight text-slate-950">
@@ -612,11 +568,6 @@ export default async function RestaurantDetailPage({
                             type="hidden"
                             name="product_id"
                             value={product.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="image_path"
-                            value={product.image_path || ""}
                           />
 
                           <SubmitButton
@@ -782,9 +733,6 @@ export default async function RestaurantDetailPage({
                         {sortedChecks.map((check) => {
                           const asset = check.maintenance_assets;
                           const isChecked = Boolean(check.is_checked);
-                          const imageUrl = getMaintenanceImageUrl(
-                            asset?.image_path || null,
-                          );
 
                           return (
                             <div
@@ -795,22 +743,6 @@ export default async function RestaurantDetailPage({
                                   : "bg-slate-50 ring-slate-200"
                               }`}
                             >
-                              <div className="rounded-[1.35rem] bg-white p-3 ring-1 ring-slate-100">
-                                <div className="flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
-                                  {imageUrl ? (
-                                    <img
-                                      src={imageUrl}
-                                      alt={asset?.name || "Barang maintenance"}
-                                      className="h-full w-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-slate-400">
-                                      <Wrench size={36} />
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
                               <div className="mt-4 flex items-start justify-between gap-3">
                                 <div>
                                   <h4 className="text-lg font-black text-slate-950">

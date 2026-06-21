@@ -163,7 +163,7 @@ function buildEmailHtml(products: ProductRow[]) {
 
           <p style="margin:0;font-size:15px;line-height:1.8;color:#cbd5e1;">
             Produk berikut akan habis masa berlakunya dalam <strong style="color:#ffffff;">10 hari atau kurang</strong>.
-            Mohon segera dicek agar stok tetap aman dan terkontrol.
+            Mohon segera dicek agar bisa di refill kembali.
           </p>
         </div>
 

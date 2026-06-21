@@ -3,7 +3,6 @@ import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
-  ImagePlus,
   PackagePlus,
   Save,
   Store,
@@ -43,51 +42,6 @@ function toNullableText(value: FormDataEntryValue | null) {
   if (stringValue === "") return null;
 
   return stringValue;
-}
-
-function getFileExtension(fileName: string) {
-  const extension = fileName.split(".").pop()?.toLowerCase();
-
-  if (!extension) return "jpg";
-
-  return extension.replace(/[^a-z0-9]/g, "") || "jpg";
-}
-
-async function uploadProductImage(file: File, placeId: string) {
-  if (!file || file.size === 0) {
-    return null;
-  }
-
-  if (!file.type.startsWith("image/")) {
-    throw new Error("File harus berupa gambar.");
-  }
-
-  const maxSize = 5 * 1024 * 1024;
-
-  if (file.size > maxSize) {
-    throw new Error("Ukuran foto maksimal 5MB.");
-  }
-
-  const extension = getFileExtension(file.name);
-  const fileName = `${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}.${extension}`;
-
-  const filePath = `${placeId}/${fileName}`;
-
-  const { error } = await supabase.storage
-    .from("product-images")
-    .upload(filePath, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type,
-    });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return filePath;
 }
 
 export default async function NewProductPage({ params }: PageProps) {
@@ -131,18 +85,10 @@ export default async function NewProductPage({ params }: PageProps) {
     const volumeUnit = toNullableText(formData.get("volume_unit"));
     const expiresAt = toNullableText(formData.get("expires_at"));
     const note = toNullableText(formData.get("note"));
-    const imageFile = formData.get("image");
-
-    let imagePath: string | null = null;
-
-    if (imageFile instanceof File && imageFile.size > 0) {
-      imagePath = await uploadProductImage(imageFile, placeId);
-    }
 
     const { error } = await supabase.from("products").insert({
       place_id: placeId,
       name,
-      image_path: imagePath,
       quantity,
       volume_value: volumeValue,
       volume_unit: volumeUnit,
@@ -250,47 +196,6 @@ export default async function NewProductPage({ params }: PageProps) {
                 placeholder="Contoh: Saus Premium"
                 className="mt-2 w-full rounded-[1.35rem] border border-slate-200 bg-slate-50 px-4 py-4 text-base font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
               />
-            </div>
-
-            <div className="rounded-[1.8rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
-                  <ImagePlus size={24} />
-                </div>
-
-                <div>
-                  <h2 className="text-lg font-black text-slate-950">
-                    Foto Produk
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    Upload foto produk. Format gambar maksimal 5MB.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-[1.6rem] bg-white p-4 ring-1 ring-slate-200">
-                <div className="flex min-h-44 flex-col items-center justify-center rounded-[1.25rem] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
-                    <ImagePlus size={30} />
-                  </div>
-
-                  <p className="mt-4 text-sm font-black text-slate-800">
-                    Pilih foto produk
-                  </p>
-
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    Foto akan tampil di kartu produk setelah disimpan.
-                  </p>
-
-                  <input
-                    id="image"
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    className="mt-5 w-full rounded-[1.2rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
-                  />
-                </div>
-              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

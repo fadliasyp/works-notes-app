@@ -1,14 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import {
-  ArrowLeft,
-  ImagePlus,
-  Save,
-  Settings,
-  Store,
-  Trash2,
-  Wrench,
-} from "lucide-react";
+import { ArrowLeft, Save, Settings, Store, Trash2, Wrench } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
 import { withToast } from "@/lib/toast";
@@ -31,7 +23,6 @@ type MaintenanceAsset = {
   place_id: string;
   name: string;
   description: string | null;
-  image_path: string | null;
   is_active: boolean | null;
   sort_order: number | null;
   created_at: string | null;
@@ -56,61 +47,6 @@ function toNullableNumber(value: FormDataEntryValue | null) {
   if (stringValue === "") return null;
 
   return Number(stringValue);
-}
-
-function getFileExtension(fileName: string) {
-  const extension = fileName.split(".").pop()?.toLowerCase();
-
-  if (!extension) return "jpg";
-
-  return extension.replace(/[^a-z0-9]/g, "") || "jpg";
-}
-
-async function uploadMaintenanceImage(file: File, placeId: string) {
-  if (!file || file.size === 0) {
-    return null;
-  }
-
-  if (!file.type.startsWith("image/")) {
-    throw new Error("File harus berupa gambar.");
-  }
-
-  const maxSize = 5 * 1024 * 1024;
-
-  if (file.size > maxSize) {
-    throw new Error("Ukuran foto maksimal 5MB.");
-  }
-
-  const extension = getFileExtension(file.name);
-  const fileName = `${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}.${extension}`;
-
-  const filePath = `${placeId}/${fileName}`;
-
-  const { error } = await supabase.storage
-    .from("maintenance-images")
-    .upload(filePath, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type,
-    });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return filePath;
-}
-
-function getMaintenanceImageUrl(imagePath: string | null) {
-  if (!imagePath) return null;
-
-  const { data } = supabase.storage
-    .from("maintenance-images")
-    .getPublicUrl(imagePath);
-
-  return data.publicUrl;
 }
 
 export default async function MaintenanceAssetsPage({ params }: PageProps) {
@@ -157,13 +93,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
 
     const description = toNullableText(formData.get("description"));
     const sortOrder = toNullableNumber(formData.get("sort_order")) || 0;
-    const imageFile = formData.get("image");
-
-    let imagePath: string | null = null;
-
-    if (imageFile instanceof File && imageFile.size > 0) {
-      imagePath = await uploadMaintenanceImage(imageFile, placeId);
-    }
 
     const { data: insertedAsset, error: insertError } = await supabase
       .from("maintenance_assets")
@@ -171,7 +100,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
         place_id: placeId,
         name,
         description,
-        image_path: imagePath,
         sort_order: sortOrder,
         is_active: true,
       })
@@ -232,7 +160,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
 
     const placeId = formData.get("place_id")?.toString();
     const assetId = formData.get("asset_id")?.toString();
-    const currentImagePath = toNullableText(formData.get("current_image_path"));
 
     if (!placeId || !assetId) {
       throw new Error("ID tempat atau ID barang tidak ditemukan.");
@@ -246,20 +173,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
 
     const description = toNullableText(formData.get("description"));
     const sortOrder = toNullableNumber(formData.get("sort_order")) || 0;
-    const imageFile = formData.get("image");
-
-    let nextImagePath = currentImagePath;
-
-    if (imageFile instanceof File && imageFile.size > 0) {
-      const uploadedPath = await uploadMaintenanceImage(imageFile, placeId);
-      nextImagePath = uploadedPath;
-
-      if (currentImagePath) {
-        await supabase.storage
-          .from("maintenance-images")
-          .remove([currentImagePath]);
-      }
-    }
 
     const { error } = await supabase
       .from("maintenance_assets")
@@ -267,7 +180,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
         name,
         description,
         sort_order: sortOrder,
-        image_path: nextImagePath,
         updated_at: new Date().toISOString(),
       })
       .eq("id", assetId)
@@ -298,14 +210,9 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
 
     const placeId = formData.get("place_id")?.toString();
     const assetId = formData.get("asset_id")?.toString();
-    const imagePath = formData.get("image_path")?.toString();
 
     if (!placeId || !assetId) {
       throw new Error("ID tempat atau ID barang tidak ditemukan.");
-    }
-
-    if (imagePath) {
-      await supabase.storage.from("maintenance-images").remove([imagePath]);
     }
 
     const { error } = await supabase
@@ -485,46 +392,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="rounded-[1.8rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-                  <ImagePlus size={24} />
-                </div>
-
-                <div>
-                  <h2 className="text-lg font-black text-slate-950">
-                    Foto Barang
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    Upload foto barang. Format gambar maksimal 5MB.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-[1.6rem] bg-white p-4 ring-1 ring-slate-200">
-                <div className="flex min-h-40 flex-col items-center justify-center rounded-[1.25rem] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-                    <ImagePlus size={30} />
-                  </div>
-
-                  <p className="mt-4 text-sm font-black text-slate-800">
-                    Pilih foto barang maintenance
-                  </p>
-
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    Foto akan tampil di checklist maintenance.
-                  </p>
-
-                  <input
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    className="mt-5 w-full rounded-[1.2rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
-                  />
-                </div>
-              </div>
-            </div>
-
             <SubmitButton
               pendingText="Menyimpan..."
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-700 sm:w-auto"
@@ -555,8 +422,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
 
           <div className="mt-5 grid gap-5">
             {assets.map((asset, index) => {
-              const imageUrl = getMaintenanceImageUrl(asset.image_path);
-
               const gradients = [
                 "from-emerald-500 via-teal-400 to-blue-500",
                 "from-blue-500 via-cyan-400 to-emerald-400",
@@ -575,32 +440,11 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
                     }`}
                   />
 
-                  <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[260px_1fr]">
-                    <div className="rounded-[1.8rem] bg-slate-50 p-3 ring-1 ring-slate-100">
-                      <div className="flex h-56 items-center justify-center overflow-hidden rounded-[1.35rem] bg-white">
-                        {imageUrl ? (
-                          <img
-                            src={imageUrl}
-                            alt={asset.name}
-                            className="h-full w-full object-contain"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-emerald-50 text-slate-400">
-                            <Wrench size={44} />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
+                  <div className="p-5 sm:p-6">
                     <div>
                       <form action={updateAsset} className="grid gap-4">
                         <input type="hidden" name="place_id" value={place.id} />
                         <input type="hidden" name="asset_id" value={asset.id} />
-                        <input
-                          type="hidden"
-                          name="current_image_path"
-                          value={asset.image_path || ""}
-                        />
 
                         <div className="grid gap-4 lg:grid-cols-[1fr_1fr_130px]">
                           <div>
@@ -641,30 +485,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
                           </div>
                         </div>
 
-                        <div className="rounded-[1.8rem] border border-slate-200 bg-slate-50 p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-                              <ImagePlus size={22} />
-                            </div>
-
-                            <div>
-                              <p className="text-sm font-black text-slate-800">
-                                Ganti Foto
-                              </p>
-                              <p className="text-xs leading-5 text-slate-500">
-                                Kosongkan jika tidak ingin mengganti foto.
-                              </p>
-                            </div>
-                          </div>
-
-                          <input
-                            name="image"
-                            type="file"
-                            accept="image/*"
-                            className="mt-4 w-full rounded-[1.2rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
-                          />
-                        </div>
-
                         <SubmitButton
                           pendingText="Memproses..."
                           className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-700 sm:w-auto"
@@ -677,11 +497,6 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
                       <form action={deleteAsset} className="mt-3">
                         <input type="hidden" name="place_id" value={place.id} />
                         <input type="hidden" name="asset_id" value={asset.id} />
-                        <input
-                          type="hidden"
-                          name="image_path"
-                          value={asset.image_path || ""}
-                        />
 
                         <SubmitButton
                           pendingText="Menghapus..."

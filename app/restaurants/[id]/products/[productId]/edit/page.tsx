@@ -1,13 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import {
-  ArrowLeft,
-  CalendarDays,
-  ImagePlus,
-  Package,
-  Save,
-  Store,
-} from "lucide-react";
+import { ArrowLeft, CalendarDays, Package, Save, Store } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
 import { withToast } from "@/lib/toast";
@@ -30,7 +23,6 @@ type Product = {
   id: string;
   place_id: string;
   name: string;
-  image_path: string | null;
   quantity: number | null;
   volume_value: number | null;
   volume_unit: string | null;
@@ -58,61 +50,6 @@ function toNullableNumber(value: FormDataEntryValue | null) {
   return Number(stringValue);
 }
 
-function getFileExtension(fileName: string) {
-  const extension = fileName.split(".").pop()?.toLowerCase();
-
-  if (!extension) return "jpg";
-
-  return extension.replace(/[^a-z0-9]/g, "") || "jpg";
-}
-
-async function uploadProductImage(file: File, placeId: string) {
-  if (!file || file.size === 0) {
-    return null;
-  }
-
-  if (!file.type.startsWith("image/")) {
-    throw new Error("File harus berupa gambar.");
-  }
-
-  const maxSize = 5 * 1024 * 1024;
-
-  if (file.size > maxSize) {
-    throw new Error("Ukuran foto maksimal 5MB.");
-  }
-
-  const extension = getFileExtension(file.name);
-  const fileName = `${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}.${extension}`;
-
-  const filePath = `${placeId}/${fileName}`;
-
-  const { error } = await supabase.storage
-    .from("product-images")
-    .upload(filePath, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type,
-    });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return filePath;
-}
-
-function getProductImageUrl(imagePath: string | null) {
-  if (!imagePath) return null;
-
-  const { data } = supabase.storage
-    .from("product-images")
-    .getPublicUrl(imagePath);
-
-  return data.publicUrl;
-}
-
 export default async function EditProductPage({ params }: PageProps) {
   const { id, productId } = await params;
 
@@ -129,7 +66,7 @@ export default async function EditProductPage({ params }: PageProps) {
   const { data: productData, error: productError } = await supabase
     .from("products")
     .select(
-      "id, place_id, name, image_path, quantity, volume_value, volume_unit, expires_at, note",
+      "id, place_id, name, quantity, volume_value, volume_unit, expires_at, note",
     )
     .eq("id", productId)
     .eq("place_id", id)
@@ -141,14 +78,12 @@ export default async function EditProductPage({ params }: PageProps) {
 
   const place = placeData as Place;
   const product = productData as Product;
-  const imageUrl = getProductImageUrl(product.image_path);
 
   async function updateProduct(formData: FormData) {
     "use server";
 
     const placeId = formData.get("place_id")?.toString();
     const currentProductId = formData.get("product_id")?.toString();
-    const currentImagePath = toNullableText(formData.get("current_image_path"));
 
     if (!placeId || !currentProductId) {
       throw new Error("ID tempat atau ID produk tidak ditemukan.");
@@ -160,23 +95,9 @@ export default async function EditProductPage({ params }: PageProps) {
     const volumeUnit = toNullableText(formData.get("volume_unit"));
     const expiresAt = toNullableText(formData.get("expires_at"));
     const note = toNullableText(formData.get("note"));
-    const imageFile = formData.get("image");
 
     if (!name) {
       throw new Error("Nama produk wajib diisi.");
-    }
-
-    let nextImagePath = currentImagePath;
-
-    if (imageFile instanceof File && imageFile.size > 0) {
-      const uploadedPath = await uploadProductImage(imageFile, placeId);
-      nextImagePath = uploadedPath;
-
-      if (currentImagePath) {
-        await supabase.storage
-          .from("product-images")
-          .remove([currentImagePath]);
-      }
     }
 
     const { error } = await supabase
@@ -188,7 +109,6 @@ export default async function EditProductPage({ params }: PageProps) {
         volume_unit: volumeUnit,
         expires_at: expiresAt,
         note,
-        image_path: nextImagePath,
         updated_at: new Date().toISOString(),
       })
       .eq("id", currentProductId)
@@ -273,11 +193,6 @@ export default async function EditProductPage({ params }: PageProps) {
         >
           <input type="hidden" name="place_id" value={place.id} />
           <input type="hidden" name="product_id" value={product.id} />
-          <input
-            type="hidden"
-            name="current_image_path"
-            value={product.image_path || ""}
-          />
 
           <div className="grid gap-6">
             <div>
@@ -296,58 +211,6 @@ export default async function EditProductPage({ params }: PageProps) {
                 placeholder="Contoh: Bumbu Ayam"
                 className="mt-2 w-full rounded-[1.35rem] border border-slate-200 bg-slate-50 px-4 py-4 text-base font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
               />
-            </div>
-
-            <div className="rounded-[1.8rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
-                  <ImagePlus size={24} />
-                </div>
-
-                <div>
-                  <h2 className="text-lg font-black text-slate-950">
-                    Foto Produk
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    Preview foto saat ini dan ganti jika diperlukan.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-[1.6rem] bg-white p-3 ring-1 ring-slate-200">
-                <div className="flex h-64 items-center justify-center overflow-hidden rounded-[1.25rem] bg-slate-50 sm:h-72">
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt={product.name}
-                      className="h-full w-full object-contain"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 text-slate-400">
-                      <Package size={44} />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-[1.6rem] bg-white p-4 ring-1 ring-slate-200">
-                <label
-                  htmlFor="image"
-                  className="mb-2 block text-sm font-black text-slate-800"
-                >
-                  Ganti Foto Produk
-                </label>
-                <input
-                  id="image"
-                  name="image"
-                  type="file"
-                  accept="image/*"
-                  className="w-full rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
-                />
-                <p className="mt-3 text-sm leading-6 text-slate-500">
-                  Kosongkan jika tidak ingin mengganti foto.
-                </p>
-              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
