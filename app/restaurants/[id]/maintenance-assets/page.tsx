@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Settings, Store, Trash2, Wrench } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
 import { withToast } from "@/lib/toast";
+import { UnsavedChangesGuard } from "@/components/UnsavedChangesGuard";
 
 type PageProps = {
   params: Promise<{
@@ -244,6 +245,7 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#eef6ff_28%,#f8fafc_55%,#ecfeff_100%)] px-4 py-5 sm:px-6 lg:px-8">
       <section className="mx-auto max-w-6xl">
+        <UnsavedChangesGuard />
         <Link
           href={`/restaurants/${place.id}?tab=maintenance`}
           className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
