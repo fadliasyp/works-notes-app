@@ -35,6 +35,7 @@ type Product = {
   volume_value: number | null;
   volume_unit: string | null;
   expires_at: string | null;
+  note: string | null;
 };
 
 function toNullableText(value: FormDataEntryValue | null) {
@@ -128,7 +129,7 @@ export default async function EditProductPage({ params }: PageProps) {
   const { data: productData, error: productError } = await supabase
     .from("products")
     .select(
-      "id, place_id, name, image_path, quantity, volume_value, volume_unit, expires_at",
+      "id, place_id, name, image_path, quantity, volume_value, volume_unit, expires_at, note",
     )
     .eq("id", productId)
     .eq("place_id", id)
@@ -158,6 +159,7 @@ export default async function EditProductPage({ params }: PageProps) {
     const volumeValue = toNullableNumber(formData.get("volume_value"));
     const volumeUnit = toNullableText(formData.get("volume_unit"));
     const expiresAt = toNullableText(formData.get("expires_at"));
+    const note = toNullableText(formData.get("note"));
     const imageFile = formData.get("image");
 
     if (!name) {
@@ -185,6 +187,7 @@ export default async function EditProductPage({ params }: PageProps) {
         volume_value: volumeValue,
         volume_unit: volumeUnit,
         expires_at: expiresAt,
+        note,
         image_path: nextImagePath,
         updated_at: new Date().toISOString(),
       })
@@ -421,6 +424,24 @@ export default async function EditProductPage({ params }: PageProps) {
                   defaultValue={product.volume_unit || ""}
                   placeholder="Contoh: kg / ml / liter"
                   className="mt-2 w-full rounded-[1.35rem] border border-slate-200 bg-slate-50 px-4 py-4 text-base font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="note"
+                  className="text-sm font-black text-slate-800"
+                >
+                  Catatan Produk
+                </label>
+
+                <textarea
+                  id="note"
+                  name="note"
+                  rows={4}
+                  defaultValue={product.note || ""}
+                  placeholder="Contoh: Prioritaskan dipakai minggu ini, stok tinggal sedikit, atau kemasan sudah terbuka..."
+                  className="mt-2 w-full resize-none rounded-[1.35rem] border border-slate-200 bg-slate-50 px-4 py-4 text-base font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 />
               </div>
             </div>

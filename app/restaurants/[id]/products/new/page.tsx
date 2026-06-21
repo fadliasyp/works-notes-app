@@ -130,6 +130,7 @@ export default async function NewProductPage({ params }: PageProps) {
     const volumeValue = toNullableNumber(formData.get("volume_value"));
     const volumeUnit = toNullableText(formData.get("volume_unit"));
     const expiresAt = toNullableText(formData.get("expires_at"));
+    const note = toNullableText(formData.get("note"));
     const imageFile = formData.get("image");
 
     let imagePath: string | null = null;
@@ -146,6 +147,7 @@ export default async function NewProductPage({ params }: PageProps) {
       volume_value: volumeValue,
       volume_unit: volumeUnit,
       expires_at: expiresAt,
+      note,
     });
 
     if (error) {
@@ -330,6 +332,23 @@ export default async function NewProductPage({ params }: PageProps) {
                     className="w-full rounded-[1.35rem] border border-slate-200 bg-slate-50 px-4 py-4 pl-11 text-base font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="note"
+                  className="text-sm font-black text-slate-800"
+                >
+                  Catatan Produk
+                </label>
+
+                <textarea
+                  id="note"
+                  name="note"
+                  rows={4}
+                  placeholder="Contoh: Prioritaskan dipakai minggu ini, stok tinggal sedikit, atau kemasan sudah terbuka..."
+                  className="mt-2 w-full resize-none rounded-[1.35rem] border border-slate-200 bg-slate-50 px-4 py-4 text-base font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                />
               </div>
             </div>
 

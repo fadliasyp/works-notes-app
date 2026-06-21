@@ -46,10 +46,10 @@ type Product = {
   volume_value: number | null;
   volume_unit: string | null;
   expires_at: string | null;
+  note: string | null;
   created_at: string | null;
   updated_at: string | null;
 };
-
 type MaintenanceAsset = {
   id: string;
   place_id: string;
@@ -580,6 +580,17 @@ export default async function RestaurantDetailPage({
                         </p>
                         <p className="mt-2 text-xl font-black text-slate-950">
                           {formatDate(product.expires_at)}
+                        </p>
+                      </div>
+
+                      <div className="mt-3 rounded-2xl bg-blue-50 p-4 ring-1 ring-blue-100">
+                        <p className="text-xs font-black uppercase tracking-wide text-blue-700">
+                          Catatan Produk
+                        </p>
+
+                        <p className="mt-2 text-sm leading-7 text-slate-700">
+                          {product.note ||
+                            "Belum ada catatan untuk produk ini."}
                         </p>
                       </div>
 
