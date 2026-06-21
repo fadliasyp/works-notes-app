@@ -167,6 +167,13 @@ export function PlaceGalleryClient({
     }
   }
 
+  function selectAllImages() {
+    if (images.length === 0) return;
+
+    openSelectionMode();
+    setSelectedIds(images.map((image) => image.id));
+  }
+
   function openDeleteConfirm(ids: string[]) {
     setDeleteTargetIds(ids);
 
@@ -392,11 +399,19 @@ export function PlaceGalleryClient({
         </div>
 
         {selectedCount > 0 && (
-          <div className="flex gap-2">
+          <div className="hidden gap-2 sm:flex">
+            <button
+              type="button"
+              onClick={selectAllImages}
+              className="rounded-2xl bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
+            >
+              Pilih Semua
+            </button>
+
             <button
               type="button"
               onClick={() => closeSelectionMode()}
-              className="rounded-2xl bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm ring-1 ring-slate-200"
+              className="rounded-2xl bg-white px-4 py-3 text-sm font-black text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
             >
               Batal
             </button>
@@ -414,7 +429,7 @@ export function PlaceGalleryClient({
       </div>
 
       {images.length > 0 ? (
-        <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+        <div className="mt-5 grid grid-cols-3 gap-2 pb-28 sm:grid-cols-4 sm:pb-0 md:grid-cols-5 lg:grid-cols-6">
           {images.map((image, index) => {
             const isSelected = selectedMap.has(image.id);
 
@@ -475,6 +490,57 @@ export function PlaceGalleryClient({
           </p>
         </div>
       )}
+
+      {selectedCount > 0 &&
+        deleteTargetIds.length === 0 &&
+        activeIndex === null && (
+          <div className="fixed bottom-4 left-0 right-0 z-[9990] px-4 sm:hidden">
+            <div className="mx-auto max-w-md overflow-hidden rounded-[1.7rem] bg-slate-950 text-white shadow-2xl shadow-slate-500/50 ring-1 ring-white/10">
+              <div className="h-1.5 bg-gradient-to-r from-blue-500 via-emerald-400 to-violet-500" />
+
+              <div className="p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-black">
+                      {selectedCount} foto dipilih
+                    </p>
+                    <p className="mt-0.5 text-xs font-semibold text-slate-400">
+                      Pilih aksi untuk foto gallery
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => closeSelectionMode()}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
+                    aria-label="Batal pilih foto"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={selectAllImages}
+                    className="inline-flex items-center justify-center rounded-2xl bg-white/10 px-4 py-3 text-sm font-black text-white ring-1 ring-white/10 transition hover:bg-white/15"
+                  >
+                    Pilih Semua
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openDeleteConfirm(selectedIds)}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-red-950/30 transition hover:bg-red-700"
+                  >
+                    <Trash2 size={17} />
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       {deleteTargetIds.length > 0 && (
         <div className="fixed inset-0 z-[99998] flex items-end justify-center bg-slate-950/40 px-4 pb-5 backdrop-blur-sm sm:items-center sm:pb-0">
