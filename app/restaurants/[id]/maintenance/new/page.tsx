@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
@@ -144,8 +144,9 @@ export default async function NewMaintenancePage({ params }: PageProps) {
       withToast(
         `/restaurants/${placeId}?tab=maintenance`,
         "success",
-        "Maintenance berhasil diperbarui.",
+        "Maintenance berhasil dibuat.",
       ),
+      RedirectType.replace,
     );
   }
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import {
   ArrowLeft,
   Building2,
@@ -57,6 +57,7 @@ export default async function NewPlacePage() {
         "success",
         "Tempat berhasil ditambahkan.",
       ),
+      RedirectType.replace,
     );
   }
 

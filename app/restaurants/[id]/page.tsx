@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -201,6 +201,7 @@ export default async function RestaurantDetailPage({
         "success",
         "Produk berhasil dihapus.",
       ),
+      RedirectType.replace,
     );
   }
 
@@ -237,6 +238,7 @@ export default async function RestaurantDetailPage({
         "success",
         "Maintenance berhasil dihapus.",
       ),
+      RedirectType.replace,
     );
   }
 
@@ -270,7 +272,14 @@ export default async function RestaurantDetailPage({
       })
       .eq("id", placeId);
 
-    redirect(`/restaurants/${placeId}?tab=maintenance`);
+    redirect(
+      withToast(
+        `/restaurants/${placeId}?tab=maintenance`,
+        "success",
+        "Checklist berhasil diperbarui.",
+      ),
+      RedirectType.replace,
+    );
   }
 
   const { data: placeData, error: placeError } = await supabase

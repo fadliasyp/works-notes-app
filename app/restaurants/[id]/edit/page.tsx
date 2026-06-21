@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 import {
   ArrowLeft,
   Building2,
@@ -85,10 +85,11 @@ export default async function EditPlacePage({ params }: PageProps) {
 
     redirect(
       withToast(
-        `/restaurants/${place.id}`,
+        `/restaurants/${placeId}`,
         "success",
         "Tempat berhasil diperbarui.",
       ),
+      RedirectType.replace,
     );
   }
 

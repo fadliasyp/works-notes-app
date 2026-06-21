@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
@@ -176,6 +176,7 @@ export default async function EditMaintenancePage({ params }: PageProps) {
         "success",
         "Maintenance berhasil diperbarui.",
       ),
+      RedirectType.replace,
     );
   }
 

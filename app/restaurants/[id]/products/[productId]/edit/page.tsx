@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 import { ArrowLeft, CalendarDays, Package, Save, Store } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -132,6 +132,7 @@ export default async function EditProductPage({ params }: PageProps) {
         "success",
         "Produk berhasil diperbarui.",
       ),
+      RedirectType.replace,
     );
   }
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 import { ArrowLeft, Images, Store } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import {
@@ -8,6 +8,7 @@ import {
 } from "@/components/PlaceGalleryClient";
 
 import { revalidatePath } from "next/cache";
+import { withToast } from "@/lib/toast";
 
 type PageProps = {
   params: Promise<{
@@ -203,7 +204,14 @@ export default async function PlaceGalleryPage({ params }: PageProps) {
       })
       .eq("id", id);
 
-    redirect(`/restaurants/${id}/gallery`);
+    redirect(
+      withToast(
+        `/restaurants/${id}/gallery`,
+        "success",
+        "Foto berhasil dihapus.",
+      ),
+      RedirectType.replace,
+    );
   }
 
   const { data: placeData, error: placeError } = await supabase

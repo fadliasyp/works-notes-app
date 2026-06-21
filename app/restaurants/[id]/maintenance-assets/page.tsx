@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 import { ArrowLeft, Save, Settings, Store, Trash2, Wrench } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -153,6 +153,7 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
         "success",
         "Barang maintenance berhasil ditambahkan.",
       ),
+      RedirectType.replace,
     );
   }
 
@@ -203,6 +204,7 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
         "success",
         "Barang maintenance berhasil diperbarui.",
       ),
+      RedirectType.replace,
     );
   }
 
@@ -239,6 +241,7 @@ export default async function MaintenanceAssetsPage({ params }: PageProps) {
         "success",
         "Barang maintenance berhasil dihapus.",
       ),
+      RedirectType.replace,
     );
   }
 
