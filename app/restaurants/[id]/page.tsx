@@ -19,6 +19,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
 import { withToast } from "@/lib/toast";
+import { ReplaceLink } from "@/components/ReplaceLink";
 
 type PageProps = {
   params: Promise<{
@@ -457,7 +458,7 @@ export default async function RestaurantDetailPage({
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3 rounded-[2rem] bg-white/90 p-2 shadow-xl shadow-slate-200/70 ring-1 ring-slate-200 backdrop-blur">
-          <Link
+          <ReplaceLink
             href={`/restaurants/${place.id}`}
             className={`flex items-center justify-center gap-2 rounded-[1.5rem] px-4 py-4 text-sm font-black transition ${
               activeTab === "products"
@@ -467,9 +468,9 @@ export default async function RestaurantDetailPage({
           >
             <Package size={18} />
             Produk
-          </Link>
+          </ReplaceLink>
 
-          <Link
+          <ReplaceLink
             href={`/restaurants/${place.id}?tab=maintenance`}
             className={`flex items-center justify-center gap-2 rounded-[1.5rem] px-4 py-4 text-sm font-black transition ${
               activeTab === "maintenance"
@@ -479,7 +480,7 @@ export default async function RestaurantDetailPage({
           >
             <Wrench size={18} />
             Maintenance
-          </Link>
+          </ReplaceLink>
         </div>
 
         {activeTab === "products" && (
