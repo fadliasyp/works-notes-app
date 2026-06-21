@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Check,
@@ -45,8 +46,10 @@ export function PlaceGalleryClient({
 
   const [selectedFileCount, setSelectedFileCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
   const [isUploading, setIsUploading] = useState(false);
   const [uploadInfo, setUploadInfo] = useState("");
 
@@ -161,6 +164,14 @@ export function PlaceGalleryClient({
     if (!fromBrowserBack) {
       window.history.back();
     }
+  }
+
+  function openDeleteConfirm(ids: string[]) {
+    setDeleteTargetIds(ids);
+  }
+
+  function closeDeleteConfirm() {
+    setDeleteTargetIds([]);
   }
 
   function toggleSelected(id: string) {
@@ -359,19 +370,14 @@ export function PlaceGalleryClient({
               Batal
             </button>
 
-            <form action={deleteAction}>
-              {selectedIds.map((id) => (
-                <input key={id} type="hidden" name="image_ids" value={id} />
-              ))}
-
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-black text-red-600 ring-1 ring-red-100 transition hover:bg-red-100"
-              >
-                <Trash2 size={17} />
-                Hapus {selectedCount}
-              </button>
-            </form>
+            <button
+              type="button"
+              onClick={() => openDeleteConfirm(selectedIds)}
+              className="inline-flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-black text-red-600 ring-1 ring-red-100 transition hover:bg-red-100"
+            >
+              <Trash2 size={17} />
+              Hapus {selectedCount}
+            </button>
           </div>
         )}
       </div>
@@ -411,20 +417,14 @@ export function PlaceGalleryClient({
                   {isSelected ? <Check size={17} /> : null}
                 </button>
 
-                <form
-                  action={deleteAction}
-                  className="absolute bottom-2 right-2"
+                <button
+                  type="button"
+                  onClick={() => openDeleteConfirm([image.id])}
+                  className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-xl bg-red-600/90 text-white shadow-lg opacity-0 transition group-hover:opacity-100"
+                  aria-label="Hapus foto"
                 >
-                  <input type="hidden" name="image_ids" value={image.id} />
-
-                  <button
-                    type="submit"
-                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-600/90 text-white shadow-lg opacity-0 transition group-hover:opacity-100"
-                    aria-label="Hapus foto"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </form>
+                  <Trash2 size={16} />
+                </button>
               </div>
             );
           })}
@@ -442,6 +442,64 @@ export function PlaceGalleryClient({
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
             Upload foto pertama untuk membuat kumpulan foto tempat ini.
           </p>
+        </div>
+      )}
+
+      {deleteTargetIds.length > 0 && (
+        <div className="fixed inset-0 z-[99998] flex items-end justify-center bg-slate-950/40 px-4 pb-5 backdrop-blur-sm sm:items-center sm:pb-0">
+          <div className="w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-900/30 ring-1 ring-slate-200">
+            <div className="h-2 bg-gradient-to-r from-red-500 via-orange-400 to-amber-400" />
+
+            <div className="p-5 sm:p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600 ring-1 ring-red-100">
+                  <AlertTriangle size={28} />
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-black text-slate-950">
+                    Hapus Foto?
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    {deleteTargetIds.length === 1
+                      ? "Foto ini akan dihapus dari gallery dan storage."
+                      : `${deleteTargetIds.length} foto akan dihapus dari gallery dan storage.`}
+                  </p>
+
+                  <p className="mt-2 text-xs font-semibold leading-6 text-red-600">
+                    Tindakan ini tidak bisa dibatalkan.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={closeDeleteConfirm}
+                  className="inline-flex items-center justify-center rounded-2xl bg-slate-100 px-5 py-4 text-sm font-black text-slate-700 transition hover:bg-slate-200"
+                >
+                  Batal
+                </button>
+
+                <form action={deleteAction}>
+                  {deleteTargetIds.map((id) => (
+                    <input key={id} type="hidden" name="image_ids" value={id} />
+                  ))}
+
+                  <button
+                    type="submit"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-red-200 transition hover:bg-red-700"
+                  >
+                    <Trash2 size={17} />
+                    {deleteTargetIds.length === 1
+                      ? "Ya, Hapus"
+                      : `Hapus ${deleteTargetIds.length}`}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
