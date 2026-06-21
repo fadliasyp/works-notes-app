@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -40,6 +40,7 @@ export function PlaceGalleryClient({
   const router = useRouter();
   const formRef = useRef<HTMLFormElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const photoViewerHistoryRef = useRef(false);
 
   const [selectedFileCount, setSelectedFileCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -142,6 +143,56 @@ export function PlaceGalleryClient({
         : [...current, id],
     );
   }
+
+  function openPhotoViewer(index: number) {
+    setActiveIndex(index);
+
+    if (!photoViewerHistoryRef.current) {
+      window.history.pushState(
+        {
+          photoViewerOpen: true,
+        },
+        "",
+        window.location.href,
+      );
+
+      photoViewerHistoryRef.current = true;
+    }
+  }
+
+  function closePhotoViewer(fromBrowserBack = false) {
+    setActiveIndex(null);
+
+    if (!photoViewerHistoryRef.current) return;
+
+    photoViewerHistoryRef.current = false;
+
+    if (!fromBrowserBack) {
+      window.history.back();
+    }
+  }
+
+  useEffect(() => {
+    function handlePopState() {
+      if (photoViewerHistoryRef.current) {
+        closePhotoViewer(true);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && photoViewerHistoryRef.current) {
+        closePhotoViewer();
+      }
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   function clearSelected() {
     setSelectedIds([]);
@@ -287,7 +338,7 @@ export function PlaceGalleryClient({
               >
                 <button
                   type="button"
-                  onClick={() => setActiveIndex(index)}
+                  onClick={() => openPhotoViewer(index)}
                   className="h-full w-full"
                 >
                   <img
@@ -349,7 +400,7 @@ export function PlaceGalleryClient({
           <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-4 py-4">
             <button
               type="button"
-              onClick={() => setActiveIndex(null)}
+              onClick={() => closePhotoViewer()}
               className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
             >
               <X size={24} />
