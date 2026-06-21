@@ -13,6 +13,8 @@ import {
   Store,
   Trash2,
   Wrench,
+  Images,
+  Camera,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -25,6 +27,15 @@ type PageProps = {
   searchParams?: Promise<{
     tab?: string;
   }>;
+};
+
+type GalleryImage = {
+  id: string;
+  place_id: string;
+  image_path: string;
+  file_name: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 type Place = {
@@ -99,6 +110,14 @@ function getDaysLeft(dateValue: string | null) {
 
   const diff = targetDate.getTime() - today.getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+function getGalleryImageUrl(imagePath: string) {
+  const { data } = supabase.storage
+    .from("place-gallery-images")
+    .getPublicUrl(imagePath);
+
+  return data.publicUrl;
 }
 
 function getExpiryBadge(expiresAt: string | null) {
@@ -269,6 +288,17 @@ export default async function RestaurantDetailPage({
     .eq("place_id", id)
     .order("name", { ascending: true });
 
+  const { data: galleryData, error: galleryError } = await supabase
+    .from("place_gallery_images")
+    .select("id, place_id, image_path, file_name, created_at, updated_at")
+    .eq("place_id", id)
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (galleryError) {
+    throw new Error(galleryError.message);
+  }
+
   const { data: maintenanceData, error: maintenanceError } = await supabase
     .from("maintenance_sessions")
     .select(
@@ -328,6 +358,11 @@ export default async function RestaurantDetailPage({
   const place = placeData as Place;
   const products = (productsData || []) as Product[];
   const maintenanceSessions = (maintenanceData || []) as MaintenanceSession[];
+
+  const galleryImages = (galleryData || []) as GalleryImage[];
+  const previewImages = galleryImages.slice(0, 4);
+  const extraImageCount = Math.max(galleryImages.length - 4, 0);
+  const latestGalleryImage = galleryImages[0];
 
   const totalMaintenance = maintenanceSessions.length;
   const totalProducts = products.length;
@@ -449,6 +484,91 @@ export default async function RestaurantDetailPage({
 
         {activeTab === "products" && (
           <>
+            <Link
+              href={`/restaurants/${place.id}/gallery`}
+              className="mt-7 block overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/60 ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-300/70"
+            >
+              <div className="h-2 bg-gradient-to-r from-blue-500 via-emerald-400 to-violet-500" />
+
+              <div className="p-5 sm:p-6">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
+                      <Images size={24} />
+                    </div>
+
+                    <div>
+                      <h2 className="text-xl font-black text-slate-950">
+                        Kumpulan Foto
+                      </h2>
+
+                      <p className="mt-1 text-xs font-semibold text-slate-500">
+                        {galleryImages.length > 0
+                          ? `${galleryImages.length} foto tersimpan`
+                          : "Belum ada foto"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-700 ring-1 ring-blue-100">
+                    Buka Gallery
+                  </span>
+                </div>
+
+                {previewImages.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-2 overflow-hidden rounded-[1.5rem]">
+                    {previewImages.map((image, index) => {
+                      const imageUrl = getGalleryImageUrl(image.image_path);
+                      const showOverlay = index === 3 && extraImageCount > 0;
+
+                      return (
+                        <div
+                          key={image.id}
+                          className="relative aspect-[4/3] overflow-hidden bg-slate-100"
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={image.file_name || "Foto tempat"}
+                            className="h-full w-full object-cover"
+                          />
+
+                          {showOverlay && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/55 text-4xl font-black text-white">
+                              +{extraImageCount}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex min-h-44 items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-blue-50 via-white to-emerald-50 ring-1 ring-slate-200">
+                    <div className="text-center">
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                        <Camera size={28} />
+                      </div>
+
+                      <p className="mt-3 text-sm font-black text-slate-800">
+                        Tambahkan foto tempat
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        Klik untuk membuka halaman gallery.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <p className="mt-3 text-xs font-semibold text-slate-500">
+                  Terakhir diubah:{" "}
+                  <span className="font-black text-slate-700">
+                    {latestGalleryImage
+                      ? formatDate(latestGalleryImage.created_at)
+                      : "Belum ada foto"}
+                  </span>
+                </p>
+              </div>
+            </Link>
             <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 className="text-3xl font-black tracking-tight text-slate-950">
