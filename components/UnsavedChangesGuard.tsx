@@ -21,6 +21,7 @@ export function UnsavedChangesGuard({
   const dirtyRef = useRef(false);
   const guardHistoryRef = useRef(false);
   const allowLeaveRef = useRef(false);
+
   const pendingHrefRef = useRef<string | null>(null);
   const pendingBackRef = useRef(false);
 
@@ -46,6 +47,14 @@ export function UnsavedChangesGuard({
     activateGuard();
   }
 
+  function resetGuardState() {
+    dirtyRef.current = false;
+    guardHistoryRef.current = false;
+    allowLeaveRef.current = true;
+    setIsDirty(false);
+    setIsOpen(false);
+  }
+
   function stayOnPage() {
     setIsOpen(false);
     pendingHrefRef.current = null;
@@ -57,19 +66,26 @@ export function UnsavedChangesGuard({
   }
 
   function leavePage() {
-    allowLeaveRef.current = true;
-    dirtyRef.current = false;
-    guardHistoryRef.current = false;
-    setIsDirty(false);
-    setIsOpen(false);
-
     const pendingHref = pendingHrefRef.current;
     const shouldGoBack = pendingBackRef.current;
+    const hasGuardHistory = guardHistoryRef.current;
+
+    resetGuardState();
 
     pendingHrefRef.current = null;
     pendingBackRef.current = false;
 
     if (pendingHref) {
+      if (hasGuardHistory) {
+        window.history.back();
+
+        window.setTimeout(() => {
+          router.replace(pendingHref);
+        }, 80);
+
+        return;
+      }
+
       router.replace(pendingHref);
       return;
     }
@@ -103,10 +119,46 @@ export function UnsavedChangesGuard({
       markDirty();
     }
 
-    function handleSubmit() {
+    function handleSubmit(event: SubmitEvent) {
+      if (!dirtyRef.current || allowLeaveRef.current) {
+        allowLeaveRef.current = true;
+        dirtyRef.current = false;
+        setIsDirty(false);
+        return;
+      }
+
+      const form = event.target as HTMLFormElement | null;
+
+      if (!form) return;
+
+      const submitter = event.submitter as HTMLElement | null;
+      const hasGuardHistory = guardHistoryRef.current;
+
       allowLeaveRef.current = true;
       dirtyRef.current = false;
       setIsDirty(false);
+      setIsOpen(false);
+
+      if (!hasGuardHistory) {
+        return;
+      }
+
+      event.preventDefault();
+
+      guardHistoryRef.current = false;
+
+      window.history.back();
+
+      window.setTimeout(() => {
+        if (
+          submitter instanceof HTMLButtonElement ||
+          submitter instanceof HTMLInputElement
+        ) {
+          form.requestSubmit(submitter);
+        } else {
+          form.requestSubmit();
+        }
+      }, 80);
     }
 
     function handleClick(event: MouseEvent) {
