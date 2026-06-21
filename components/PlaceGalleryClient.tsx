@@ -43,6 +43,7 @@ export function PlaceGalleryClient({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const photoViewerHistoryRef = useRef(false);
   const selectionHistoryRef = useRef(false);
+  const deleteConfirmHistoryRef = useRef(false);
 
   const [selectedFileCount, setSelectedFileCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -168,10 +169,30 @@ export function PlaceGalleryClient({
 
   function openDeleteConfirm(ids: string[]) {
     setDeleteTargetIds(ids);
+
+    if (!deleteConfirmHistoryRef.current) {
+      window.history.pushState(
+        {
+          galleryDeleteConfirmOpen: true,
+        },
+        "",
+        window.location.href,
+      );
+
+      deleteConfirmHistoryRef.current = true;
+    }
   }
 
-  function closeDeleteConfirm() {
+  function closeDeleteConfirm(fromBrowserBack = false) {
     setDeleteTargetIds([]);
+
+    if (!deleteConfirmHistoryRef.current) return;
+
+    deleteConfirmHistoryRef.current = false;
+
+    if (!fromBrowserBack) {
+      window.history.back();
+    }
   }
 
   function toggleSelected(id: string) {
@@ -225,6 +246,11 @@ export function PlaceGalleryClient({
 
   useEffect(() => {
     function handlePopState() {
+      if (deleteConfirmHistoryRef.current) {
+        closeDeleteConfirm(true);
+        return;
+      }
+
       if (photoViewerHistoryRef.current) {
         closePhotoViewer(true);
         return;
@@ -238,6 +264,11 @@ export function PlaceGalleryClient({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
+
+      if (deleteConfirmHistoryRef.current) {
+        closeDeleteConfirm();
+        return;
+      }
 
       if (photoViewerHistoryRef.current) {
         closePhotoViewer();
@@ -463,8 +494,8 @@ export function PlaceGalleryClient({
 
                   <p className="mt-2 text-sm leading-7 text-slate-600">
                     {deleteTargetIds.length === 1
-                      ? "Foto ini akan dihapus dari gallery dan storage."
-                      : `${deleteTargetIds.length} foto akan dihapus dari gallery dan storage.`}
+                      ? "Foto ini akan dihapus dari website."
+                      : `${deleteTargetIds.length} foto akan dihapus dari website.`}
                   </p>
 
                   <p className="mt-2 text-xs font-semibold leading-6 text-red-600">
@@ -476,7 +507,7 @@ export function PlaceGalleryClient({
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={closeDeleteConfirm}
+                  onClick={() => closeDeleteConfirm()}
                   className="inline-flex items-center justify-center rounded-2xl bg-slate-100 px-5 py-4 text-sm font-black text-slate-700 transition hover:bg-slate-200"
                 >
                   Batal
