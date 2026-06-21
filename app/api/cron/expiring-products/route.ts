@@ -162,7 +162,7 @@ function buildEmailHtml(products: ProductRow[]) {
           </h1>
 
           <p style="margin:0;font-size:15px;line-height:1.8;color:#cbd5e1;">
-            Produk berikut akan habis masa berlakunya dalam <strong style="color:#ffffff;">10 hari atau kurang</strong>.
+            Produk berikut akan habis masa berlakunya dalam <strong style="color:#ffffff;">5 hari atau kurang</strong>.
             Mohon segera dicek agar bisa di refill kembali.
           </p>
         </div>
@@ -265,9 +265,8 @@ export async function GET(request: Request) {
       { status: 500 },
     );
   }
-
   const today = getTodayDateString();
-  const tenDaysLater = addDaysDateString(10);
+  const fiveDaysLater = addDaysDateString(5);
 
   const { data: productsData, error: productsError } = await supabaseAdmin
     .from("products")
@@ -288,7 +287,7 @@ export async function GET(request: Request) {
     )
     .not("expires_at", "is", null)
     .gte("expires_at", today)
-    .lte("expires_at", tenDaysLater)
+    .lte("expires_at", fiveDaysLater)
     .order("expires_at", { ascending: true });
 
   if (productsError) {
@@ -303,7 +302,7 @@ export async function GET(request: Request) {
   if (products.length === 0) {
     return Response.json({
       ok: true,
-      message: "Tidak ada produk yang expired dalam 10 hari.",
+      message: "Tidak ada produk yang expired dalam 5 hari.",
       count: 0,
     });
   }
@@ -344,7 +343,7 @@ export async function GET(request: Request) {
   }
 
   const resend = new Resend(resendApiKey);
-  const subject = `⚠️ Notifikasi Expired: ${productsToNotify.length} Produk Perlu Dicek`;
+  const subject = `⚠️ Notifikasi Expired 5 Hari: ${productsToNotify.length} Produk Perlu Dicek`;
   const html = buildEmailHtml(productsToNotify);
   const text = buildEmailText(productsToNotify);
 

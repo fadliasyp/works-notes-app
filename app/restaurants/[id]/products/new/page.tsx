@@ -308,7 +308,7 @@ export default async function NewProductPage({ params }: PageProps) {
 
             <div className="rounded-[1.6rem] bg-blue-50 p-4 text-sm leading-7 text-blue-800 ring-1 ring-blue-100">
               <b>Catatan:</b> produk yang masa berlakunya kurang dari atau sama
-              dengan 10 hari akan masuk ke sistem notifikasi expired.
+              dengan 5 hari akan masuk ke sistem notifikasi expired.
             </div>
 
             <div className="grid gap-3 pt-2 sm:grid-cols-2">
