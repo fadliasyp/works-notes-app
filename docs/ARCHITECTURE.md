@@ -1,10 +1,10 @@
 # Architecture
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 ## High-Level Architecture
 
-Works Notes App adalah satu aplikasi Next.js App Router. UI, reads, dan Server Actions berada dalam route tree yang sama. Supabase menjadi data/storage backend, sedangkan Resend hanya dipakai oleh cron Route Handler.
+Works Notes App adalah satu aplikasi Next.js App Router. UI, reads, dan Server Actions berada dalam route tree yang sama. Supabase menjadi data/storage backend, sedangkan Nodemailer mengirim email melalui SMTP dari cron Route Handler.
 
 ```text
 Browser
@@ -20,7 +20,7 @@ Browser
 Vercel Cron -- Bearer secret --> GET /api/cron/expiring-products
                                       |
                                       +-- Supabase service role
-                                      +-- Resend email
+                                      +-- SMTP email via Nodemailer
                                       +-- notification_logs
 
 GitHub Actions -- anon REST ping --> Supabase /rest/v1/todos
@@ -76,7 +76,7 @@ UI Actions memakai singleton Supabase anon client dari `lib/supabase.ts`. Cron m
 - Query products yang `expires_at` berada antara hari ini dan +5 hari.
 - Join place summary untuk isi email.
 - Filter existing `notification_logs`.
-- Kirim HTML + plain-text melalui Resend.
+- Kirim HTML + plain-text melalui SMTP dengan Nodemailer.
 - Simpan success/failure log.
 - Response JSON dengan `ok`, `message`/`error`, dan kadang `count`.
 
@@ -114,7 +114,7 @@ Schema authoritative tidak tersedia. Lihat `docs/DATABASE.md`.
 ## External Services
 
 - Supabase Database/Storage.
-- Resend Email API.
+- SMTP email melalui Nodemailer.
 - Vercel deployment/cron berdasarkan `vercel.json`.
 - GitHub Actions untuk keep-alive.
 - Google Fonts saat build.
@@ -168,7 +168,7 @@ Vercel Cron
   --> bearer validation
   --> products expiring today..+5 days
   --> exclude existing product/expiry logs
-  --> Resend email
+  --> SMTP email via Nodemailer
   --> insert notification_logs
 ```
 
@@ -196,4 +196,3 @@ Vercel Cron
 - Failed email logs currently suppress retry.
 - Build is coupled to Google Fonts network access.
 - Place search reads all rows and filters in-process; this may become inefficient at larger scale.
-

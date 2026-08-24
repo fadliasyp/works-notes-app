@@ -12,6 +12,7 @@ All entries below are based on repository changes or verifiable Git history. Thi
 ### Changed
 
 - Replaced the default Create Next App README with project-specific setup, environment, verification, deployment, and documentation guidance.
+- Updated expiry-email documentation and environment examples to SMTP/Nodemailer after user-verified delivery.
 
 ### Security
 
@@ -61,4 +62,3 @@ All entries below are based on repository changes or verifiable Git history. Thi
 ### Added
 
 - Initial Create Next App scaffold (`a5a25ee`).
-

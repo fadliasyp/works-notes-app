@@ -1,6 +1,6 @@
 # Project Context
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 ## Project Overview
 
@@ -33,7 +33,7 @@ Project memiliki implementasi end-to-end yang cukup lengkap, tetapi belum dapat 
 | Sesi dan checklist maintenance | WORKING | Pembuatan snapshot checklist, edit sesi, hapus, dan toggle tersedia |
 | Gallery tempat | WORKING | Multi-upload, kompresi client, viewer, selection, dan bulk delete tersedia |
 | Toast, pending UI, dan unsaved-changes guard | WORKING | Komponen dipakai pada flow form dan history perbaikannya tersedia |
-| Email produk akan expired | PARTIAL | Endpoint dan schedule tersedia; environment/runtime belum diverifikasi |
+| Email produk akan expired | WORKING | Endpoint dan schedule tersedia; pengiriman melalui SMTP sudah diverifikasi pengguna |
 | Workflow keep-alive Supabase | UNKNOWN | Workflow tersedia tetapi bergantung pada tabel `todos` yang tidak digunakan di source lain |
 
 `WORKING` berarti implementasi ditemukan dan lolos pemeriksaan TypeScript, bukan bukti bahwa fitur sudah diuji terhadap database live.
@@ -133,7 +133,7 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 | Service | Purpose | Integration |
 | --- | --- | --- |
 | Supabase | Database dan object storage | `@supabase/supabase-js` |
-| Resend | Email expiry | Server-side Route Handler |
+| SMTP | Email expiry melalui Nodemailer | Server-side Route Handler |
 | Vercel | Target deployment dan daily cron | `vercel.json` |
 | GitHub Actions | Ping Supabase tiap tiga hari | workflow YAML |
 | Google Fonts | Geist saat build | `next/font/google` |
@@ -153,4 +153,3 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 ## Session Handoff
 
 Bootstrap project memory selesai pada 24 Agustus 2026. Source code, dependency, database, deployment, dan perubahan `.gitignore` yang sudah ada tidak diubah. Mulai task berikutnya dengan membaca `AGENTS.md`, `docs/CURRENT_TASK.md`, dan `docs/FEATURE_BASELINE.md`, lalu konfirmasi akses/schema Supabase bila task menyentuh data.
-

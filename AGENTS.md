@@ -28,7 +28,7 @@ Source code and configuration override stale documentation. If they disagree, ve
 
 - Node.js, npm, TypeScript, Next.js App Router, React, and Tailwind CSS.
 - Supabase provides database access and object storage.
-- Resend sends expiry emails.
+- Nodemailer sends expiry emails through SMTP.
 - Vercel Cron invokes the notification endpoint; GitHub Actions pings Supabase.
 
 Do not add a dependency when the platform, standard library, or an installed dependency already solves the problem.
@@ -103,4 +103,3 @@ After material work, update the relevant files:
 ## Session Handoff
 
 Before ending substantial work, leave `docs/CURRENT_TASK.md` accurate, including completed work, files touched, checks run, blockers, and next steps. If no task remains, write `Belum ada task aktif.`
-

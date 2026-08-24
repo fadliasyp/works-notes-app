@@ -8,7 +8,7 @@ Works Notes App adalah aplikasi web pencatatan operasional untuk mengelola tempa
 - Next.js 16.2.9 (App Router) dan React 19.2.4
 - TypeScript 5 dan Tailwind CSS 4
 - Supabase Database dan Storage
-- Resend untuk email notifikasi
+- Nodemailer melalui SMTP untuk email notifikasi
 - Vercel Cron dan GitHub Actions
 
 ## Persyaratan
@@ -16,7 +16,7 @@ Works Notes App adalah aplikasi web pencatatan operasional untuk mengelola tempa
 - Node.js `>=20.9.0`
 - npm
 - Project Supabase dengan schema, policy RLS, dan storage bucket yang sesuai
-- Akun Resend dan environment Vercel jika notifikasi terjadwal digunakan
+- Akun SMTP dan environment Vercel jika notifikasi terjadwal digunakan
 
 Schema/migration Supabase belum tersimpan di repository. Lihat [dokumentasi database](docs/DATABASE.md) sebelum menyiapkan project baru.
 
@@ -33,11 +33,14 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 CRON_SECRET=
-RESEND_API_KEY=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
 NOTIFICATION_EMAIL_TO=
 ```
 
-`NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` dipakai aplikasi. Empat variable lainnya dipakai endpoint cron email. Workflow GitHub juga membutuhkan repository secrets `SUPABASE_URL` dan `SUPABASE_ANON_KEY`.
+`NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` dipakai aplikasi. Variable server lainnya dipakai endpoint cron email. Workflow GitHub juga membutuhkan repository secrets `SUPABASE_URL` dan `SUPABASE_ANON_KEY`.
 
 ## Development
 

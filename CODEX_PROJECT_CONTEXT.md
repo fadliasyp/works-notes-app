@@ -1019,7 +1019,7 @@ Package yang dipakai/kemungkinan sudah ada:
 
 ```text
 @supabase/supabase-js
-resend
+nodemailer
 lucide-react
 sonner
 browser-image-compression

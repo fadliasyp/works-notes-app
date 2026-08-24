@@ -1,6 +1,6 @@
 # Current Task
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 ## Task
 
@@ -8,11 +8,11 @@ Belum ada task aktif.
 
 ## Last Completed Work
 
-Bootstrap persistent project memory berdasarkan `CODEX_PROJECT_SETUP.md`.
+Menyelaraskan dokumentasi email expiry dengan implementasi SMTP/Nodemailer.
 
 ## Goal
 
-Mendokumentasikan kondisi aktual Works Notes App tanpa mengubah source code atau external state.
+Memastikan dokumentasi sesuai implementasi SMTP yang sudah berjalan.
 
 ## Status
 
@@ -20,11 +20,9 @@ COMPLETED
 
 ## Completed
 
-- Menginventarisasi source, konfigurasi, dependency, route, Server Actions, external services, dan Git history.
-- Memetakan fitur, business logic, arsitektur, logical database model, risiko, dan baseline.
-- Memperbarui `README.md` dan `AGENTS.md`.
-- Membuat seluruh file memory di `docs/`.
-- Menghapus credential hardcoded dari current README tanpa menuliskan nilainya ke dokumentasi baru.
+- Menyelaraskan seluruh dokumentasi dengan SMTP/Nodemailer.
+- Memakai contoh environment konfigurasi SMTP aktual.
+- Mencatat konfirmasi pengguna bahwa pengiriman SMTP berjalan baik.
 
 ## Files Modified
 
@@ -34,39 +32,32 @@ COMPLETED
 - `docs/CURRENT_TASK.md`
 - `docs/FEATURE_BASELINE.md`
 - `docs/ARCHITECTURE.md`
-- `docs/DATABASE.md`
-- `docs/DECISIONS.md`
+- `CODEX_PROJECT_CONTEXT.md`
 - `docs/CHANGELOG.md`
 
 ## Findings
 
-- Repository adalah project existing, bukan scaffold kosong.
-- UI memiliki flow place, product, maintenance, dan gallery.
-- Cron email dan keep-alive automation tersedia tetapi belum runtime-verified.
-- Schema/RLS Supabase dan automated tests tidak ada di repository.
-- Credential cron pernah tersimpan di README dan perlu dirotasi.
+- Route cron memakai Nodemailer dengan `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, dan `SMTP_PASS`.
+- Tujuan email tetap berasal dari `NOTIFICATION_EMAIL_TO`.
 
 ## Verification
 
-- `npm run lint`: FAILED — 4 errors, 6 warnings.
-- `npm run build`: PARTIAL — compile dan TypeScript passed; page-data collection gagal karena `NEXT_PUBLIC_SUPABASE_URL` tidak tersedia.
-- Runtime CRUD, storage, email, dan deployed cron: belum diuji karena environment/service access tidak tersedia.
+- Pencarian repository memastikan tidak ada referensi layanan email lama yang tersisa.
+- Tidak menjalankan lint/build karena hanya dokumentasi yang berubah.
 
 ## Decisions
 
-- Tidak mengubah source code saat bootstrap.
-- Tidak memberi status `STABLE` tanpa bukti runtime/test/user.
-- Memperlakukan flow berstatus `WORKING` sebagai regression baseline sementara.
+- Tidak mengubah implementasi route yang sudah berjalan.
+- Menandai delivery SMTP sebagai user-verified tanpa mengklaim semua skenario cron sudah stabil.
 
 ## Next Steps
 
-Menunggu instruksi pengguna. Prioritas awal yang disarankan adalah rotasi secret, melengkapi environment/schema documentation, lalu membereskan lint dan membuat smoke test.
+Menunggu instruksi pengguna.
 
 ## Blockers
 
-Tidak ada blocker untuk dokumentasi. Verifikasi runtime memerlukan konfigurasi Supabase/Resend/Vercel yang valid.
+Tidak ada blocker.
 
 ## Notes for Next Session
 
 Perubahan `.gitignore` sudah ada sebelum bootstrap dan bukan bagian dari pekerjaan ini. Jangan menimpa atau membuangnya.
-

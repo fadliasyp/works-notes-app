@@ -1,6 +1,6 @@
 # Feature Baseline
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 ## Baseline Status
 
@@ -123,7 +123,7 @@ Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan
 
 ## Expiry Email Notification
 
-**Status:** PARTIAL / NOT STABLE
+**Status:** WORKING / USER-VERIFIED DELIVERY
 
 **Function:** Cron GET memilih produk yang expired dalam lima hari, mengirim satu email ringkasan, dan menulis notification logs.
 
@@ -135,9 +135,8 @@ Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan
 - Deduplikasi memakai product ID + expiry snapshot + target/channel/type.
 - HTML dan plain-text email dikirim bersama.
 
-**Known risk:** Log gagal ikut mencegah retry. Runtime environment dan Resend delivery belum diverifikasi.
+**Known risk:** Log gagal ikut mencegah retry. Pengiriman SMTP sudah diverifikasi pengguna; skenario gagal dan deduplikasi belum diuji secara terpisah.
 
 **Important files:** `app/api/cron/expiring-products/route.ts`, `lib/supabase-admin.ts`, `vercel.json`.
 
 **Verification:** Gunakan test database dan test recipient; uji unauthorized, missing env, empty result, successful send, failed send, dan repeated invocation.
-
