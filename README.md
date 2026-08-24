@@ -1,39 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Works Notes App
 
-## Getting Started
+Works Notes App adalah aplikasi web pencatatan operasional untuk mengelola tempat kerja/restoran, produk beserta masa berlakunya, dokumentasi foto tempat, dan checklist maintenance berkala.
 
-First, run the development server:
+## Stack
+
+- Node.js `>=20.9.0`
+- Next.js 16.2.9 (App Router) dan React 19.2.4
+- TypeScript 5 dan Tailwind CSS 4
+- Supabase Database dan Storage
+- Resend untuk email notifikasi
+- Vercel Cron dan GitHub Actions
+
+## Persyaratan
+
+- Node.js `>=20.9.0`
+- npm
+- Project Supabase dengan schema, policy RLS, dan storage bucket yang sesuai
+- Akun Resend dan environment Vercel jika notifikasi terjadwal digunakan
+
+Schema/migration Supabase belum tersimpan di repository. Lihat [dokumentasi database](docs/DATABASE.md) sebelum menyiapkan project baru.
+
+## Instalasi
+
+```bash
+npm ci
+```
+
+Buat `.env.local` dan isi variable yang diperlukan. Jangan commit nilainya.
+
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+CRON_SECRET=
+RESEND_API_KEY=
+NOTIFICATION_EMAIL_TO=
+```
+
+`NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` dipakai aplikasi. Empat variable lainnya dipakai endpoint cron email. Workflow GitHub juga membutuhkan repository secrets `SUPABASE_URL` dan `SUPABASE_ANON_KEY`.
+
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pemeriksaan
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+Belum ada test suite otomatis. Pada discovery 24 Agustus 2026, lint masih memiliki 4 error dan 6 warning. Build melewati kompilasi dan pemeriksaan TypeScript, lalu berhenti karena variable Supabase lokal belum tersedia. Detailnya dicatat di [project context](docs/PROJECT_CONTEXT.md).
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Repository memiliki konfigurasi Vercel Cron pada `vercel.json` untuk memanggil `/api/cron/expiring-products` setiap hari pukul 01:00 UTC (08:00 WIB). Keaktifan deployment dan konfigurasi environment production belum dapat dibuktikan dari repository saja.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Workflow `.github/workflows/keep-supabase-alive.yml` menjadwalkan ping Supabase setiap tiga hari dan juga dapat dijalankan manual.
 
-## Deploy on Vercel
+## Dokumentasi
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-Ping manual notifikasi gmail
-`curl -H "Authorization: Bearer fadliasyip12345" https://works-notes-app.vercel.app/api/cron/expiring-products`
+- [Project context](docs/PROJECT_CONTEXT.md)
+- [Current task](docs/CURRENT_TASK.md)
+- [Feature baseline](docs/FEATURE_BASELINE.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Database](docs/DATABASE.md)
+- [Decision log](docs/DECISIONS.md)
+- [Changelog](docs/CHANGELOG.md)
