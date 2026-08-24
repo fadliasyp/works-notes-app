@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
@@ -249,17 +249,22 @@ export async function GET(request: Request) {
     return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const resendApiKey = process.env.RESEND_API_KEY;
-  const emailTo = process.env.NOTIFICATION_EMAIL_TO;
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = Number(process.env.SMTP_PORT);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const emailTo = process.env.NOTIFICATION_EMAIL_TO?.split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
 
-  if (!resendApiKey) {
+  if (!smtpHost || !smtpPort || !smtpUser || !smtpPass) {
     return Response.json(
-      { ok: false, error: "RESEND_API_KEY belum diisi." },
+      { ok: false, error: "Konfigurasi SMTP belum lengkap." },
       { status: 500 },
     );
   }
 
-  if (!emailTo) {
+  if (!emailTo?.length) {
     return Response.json(
       { ok: false, error: "NOTIFICATION_EMAIL_TO belum diisi." },
       { status: 500 },
@@ -313,7 +318,7 @@ export async function GET(request: Request) {
     .from("notification_logs")
     .select("product_id, expires_at_snapshot")
     .eq("channel", "email")
-    .eq("target", emailTo)
+    .eq("target", emailTo.join(","))
     .eq("notification_type", "product_expiry")
     .in("product_id", productIds);
 
@@ -342,23 +347,34 @@ export async function GET(request: Request) {
     });
   }
 
-  const resend = new Resend(resendApiKey);
+  const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: { user: smtpUser, pass: smtpPass },
+  });
   const subject = `⚠️ Notifikasi Expired 5 Hari: ${productsToNotify.length} Produk Perlu Dicek`;
   const html = buildEmailHtml(productsToNotify);
   const text = buildEmailText(productsToNotify);
 
-  const { error: emailError } = await resend.emails.send({
-    from: "Catatan Kerja <onboarding@resend.dev>",
-    to: [emailTo],
-    subject,
-    html,
-    text,
-  });
+  let emailError: Error | null = null;
+
+  try {
+    await transporter.sendMail({
+      from: `Catatan Kerja <${smtpUser}>`,
+      to: emailTo,
+      subject,
+      html,
+      text,
+    });
+  } catch (error) {
+    emailError = error instanceof Error ? error : new Error(String(error));
+  }
 
   const logRows = productsToNotify.map((product) => ({
     product_id: product.id,
     channel: "email",
-    target: emailTo,
+    target: emailTo.join(","),
     status: emailError ? "failed" : "sent",
     sent_at: emailError ? null : new Date().toISOString(),
     error_message: emailError ? emailError.message : null,
