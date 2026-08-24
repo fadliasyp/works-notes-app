@@ -250,7 +250,9 @@ export async function GET(request: Request) {
   }
 
   const resendApiKey = process.env.RESEND_API_KEY;
-  const emailTo = process.env.NOTIFICATION_EMAIL_TO;
+  const emailTo = process.env.NOTIFICATION_EMAIL_TO?.split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
 
   if (!resendApiKey) {
     return Response.json(
@@ -259,7 +261,7 @@ export async function GET(request: Request) {
     );
   }
 
-  if (!emailTo) {
+  if (!emailTo?.length) {
     return Response.json(
       { ok: false, error: "NOTIFICATION_EMAIL_TO belum diisi." },
       { status: 500 },
@@ -313,7 +315,7 @@ export async function GET(request: Request) {
     .from("notification_logs")
     .select("product_id, expires_at_snapshot")
     .eq("channel", "email")
-    .eq("target", emailTo)
+    .eq("target", emailTo.join(","))
     .eq("notification_type", "product_expiry")
     .in("product_id", productIds);
 
@@ -349,7 +351,7 @@ export async function GET(request: Request) {
 
   const { error: emailError } = await resend.emails.send({
     from: "Catatan Kerja <onboarding@resend.dev>",
-    to: [emailTo],
+    to: emailTo,
     subject,
     html,
     text,
@@ -358,7 +360,7 @@ export async function GET(request: Request) {
   const logRows = productsToNotify.map((product) => ({
     product_id: product.id,
     channel: "email",
-    target: emailTo,
+    target: emailTo.join(","),
     status: emailError ? "failed" : "sent",
     sent_at: emailError ? null : new Date().toISOString(),
     error_message: emailError ? emailError.message : null,
