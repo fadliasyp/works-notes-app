@@ -36,6 +36,7 @@ GitHub Actions -- anon REST ping --> Supabase /rest/v1/todos
   - `ToastListener` dan `SonnerProvider`: toast.
   - `SubmitButton`: pending form state.
   - `ReplaceLink`: replace navigation pada detail tab.
+  - `BottomNavigation`: active state navigasi utama berdasarkan pathname.
 - Styling memakai Tailwind CSS utility classes dan global CSS minimal.
 - Visual baseline memakai gradient lembut biru/putih/emerald, card rounded besar, shadow halus, dan touch target yang nyaman di HP.
 - Geist dan Geist Mono dimuat melalui `next/font/google`.
@@ -45,6 +46,7 @@ GitHub Actions -- anon REST ping --> Supabase /rest/v1/todos
 | Route | Responsibility |
 | --- | --- |
 | `/` | List/search/delete tempat |
+| `/expiring-products` | Produk yang expired hari ini sampai +5 hari, dikelompokkan per tempat |
 | `/restaurants/new` | Create tempat |
 | `/restaurants/[id]` | Detail, products, maintenance, gallery preview |
 | `/restaurants/[id]/edit` | Edit tempat |
@@ -174,6 +176,16 @@ Vercel Cron
   --> exclude existing product/expiry logs
   --> SMTP email via Nodemailer
   --> insert notification_logs
+```
+
+### Expiring Products Dashboard
+
+```text
+Open /expiring-products
+  --> dynamic Server Component
+  --> places dengan embedded products expiry hari ini..+5 hari
+  --> urutkan tempat dan tanggal expiry
+  --> render card per tempat dan produk
 ```
 
 ## Deployment

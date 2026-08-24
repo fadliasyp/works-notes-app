@@ -8,12 +8,15 @@ All entries below are based on repository changes or verifiable Git history. Thi
 
 - Persistent project memory: context, current task, feature baseline, architecture, database, decision log, and changelog.
 - Permanent project-specific Codex rules in `AGENTS.md`.
+- Dynamic dashboard produk yang akan expired dalam rentang hari ini sampai +5 hari, dikelompokkan per tempat.
+- Bottom navigation mobile untuk berpindah antara daftar tempat dan produk segera expired.
 
 ### Changed
 
 - Replaced the default Create Next App README with project-specific setup, environment, verification, deployment, and documentation guidance.
 - Updated expiry-email documentation and environment examples to SMTP/Nodemailer after user-verified delivery.
 - Integrated `CODEX_PROJECT_CONTEXT.md` into permanent docs: intentional no-auth scope, mobile-first visual/navigation baseline, centralized place gallery, and documented Supabase relationships/constraints.
+- Added bottom spacing to the homepage so the fixed navigation does not cover content.
 
 ### Security
 
@@ -22,7 +25,8 @@ All entries below are based on repository changes or verifiable Git history. Thi
 ### Documentation
 
 - Recorded current features, business rules, integration points, unknown schema details, verification results, and known risks.
-- Updated verification after environment completion: lint remains at 4 errors/6 warnings; build now reaches dependency resolution and reports missing local `nodemailer` installation.
+- Updated verification after environment completion: production build passes; full lint remains at 4 errors/6 warnings.
+- Recorded passing targeted lint, production build, and local HTTP 200 response for the expiry dashboard; the new route is server-rendered on demand.
 
 ## 2026-06-22
 

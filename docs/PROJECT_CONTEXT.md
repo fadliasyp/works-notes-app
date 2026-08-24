@@ -19,7 +19,7 @@ Project memiliki implementasi end-to-end yang cukup lengkap, tetapi belum dapat 
 - Tidak ada automated test suite.
 - `npm run lint` gagal dengan 4 error dan 6 warning.
 - `.env.local` kini memuat seluruh nama variable yang dibutuhkan; nilainya tidak dibaca saat discovery.
-- `npm run build` pada 25 Agustus 2026 berhenti karena module `nodemailer` belum tersedia di `node_modules` meskipun sudah tercantum di manifest/lockfile.
+- `npm run build` lulus pada 25 Agustus 2026 setelah dependency lokal disinkronkan.
 - Schema, migration, RLS policy, dan seed Supabase tidak tersimpan di repository.
 - Deployment yang benar-benar aktif dan perilaku terhadap database production belum diverifikasi.
 
@@ -36,6 +36,7 @@ Project memiliki implementasi end-to-end yang cukup lengkap, tetapi belum dapat 
 | Gallery tempat | STABLE | Multi-upload, kompresi, viewer, selection/delete, dan Back HP dinyatakan sudah berjalan |
 | Toast, pending UI, dan unsaved-changes guard | STABLE | Perilaku feedback dan navigation dinyatakan sudah berjalan/rapi |
 | Email produk akan expired | WORKING / USER-VERIFIED DELIVERY | Endpoint dan schedule tersedia; pengiriman SMTP sudah diverifikasi pengguna |
+| Dashboard produk segera expired | WORKING / PROTECTED | Route dinamis menampilkan produk hari ini sampai +5 hari per tempat dan dapat dibuka dari bottom navigation |
 | Workflow keep-alive Supabase | UNKNOWN | Workflow tersedia tetapi bergantung pada tabel `todos` yang tidak digunakan di source lain |
 
 `STABLE` di tabel ini berasal dari catatan project/user mengenai perilaku yang sudah bagus dan harus dipertahankan. `WORKING` berarti implementasi ditemukan, tetapi seluruh skenario database live belum diuji.
@@ -49,11 +50,10 @@ Belum ada task development aktif setelah bootstrap dokumentasi ini.
 Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 
 1. Rotasi `CRON_SECRET` karena credential pernah tercatat di README dan masih mungkin ada di Git history.
-2. Jalankan `npm ci` agar `node_modules` sinkron dengan lockfile, lalu ulangi build.
-3. Selesaikan 4 lint errors dan tinjau 6 warnings.
-4. Simpan schema/migration/RLS/storage policy Supabase dalam repository.
-5. Verifikasi atau perbaiki workflow keep-alive yang membaca tabel `todos`.
-6. Tambahkan regression checks untuk business flow penting.
+2. Selesaikan 4 lint errors dan tinjau 6 warnings.
+3. Simpan schema/migration/RLS/storage policy Supabase dalam repository.
+4. Verifikasi atau perbaiki workflow keep-alive yang membaca tabel `todos`.
+5. Tambahkan regression checks untuk business flow penting.
 
 ## Business Logic
 
@@ -62,6 +62,7 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 - Produk memiliki nama wajib; quantity, volume, unit, expiry date, dan catatan bersifat opsional.
 - Badge expiry: lewat tanggal = merah/expired; 0–3 hari = merah; 4–10 hari = oranye; lebih dari 10 hari = hijau.
 - Endpoint email memilih produk dari hari ini sampai lima hari ke depan, lalu menghindari pengiriman ulang berdasarkan kombinasi produk dan snapshot tanggal expiry.
+- Dashboard expiry memakai rentang tanggal yang sama dengan email dan mengelompokkan produk berdasarkan tempat.
 - Maintenance baru memakai judul default “Maintenance Bulanan” dan tanggal wajib.
 - Saat sesi maintenance dibuat, semua master asset aktif disalin menjadi checklist unchecked.
 - Saat master asset baru dibuat, checklist unchecked ditambahkan ke seluruh sesi maintenance tempat tersebut.
@@ -78,6 +79,7 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 - Mutasi UI memakai Server Actions yang colocated di file route.
 - Data UI memakai Supabase anon client; cron memakai service-role client server-side.
 - Hanya ada satu Route Handler publik: `GET /api/cron/expiring-products`, dilindungi bearer secret.
+- Halaman dinamis `/expiring-products` memakai Supabase anon client dan dapat dibuka melalui bottom navigation bersama daftar tempat.
 - Tidak ada authentication/session/role/permission layer di source.
 - Toast diteruskan melalui query parameter lalu dibaca komponen client.
 - Gallery memakai Supabase public URL dan bucket `place-gallery-images`.
@@ -131,6 +133,8 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 - `components/PlaceGalleryClient.tsx`: kompresi, selection, viewer, dan browser history gallery.
 - `components/UnsavedChangesGuard.tsx`: perlindungan perubahan form.
 - `app/api/cron/expiring-products/route.ts`: query expiry, email, dan notification logs.
+- `app/expiring-products/page.tsx`: dashboard produk yang expired dalam 0–5 hari, dikelompokkan per tempat.
+- `components/BottomNavigation.tsx`: navigasi utama mobile antara daftar tempat dan dashboard expiry.
 - `lib/supabase.ts`: anon client.
 - `lib/supabase-admin.ts`: service-role client untuk cron.
 - `next.config.ts`, `vercel.json`, dan `.github/workflows/keep-supabase-alive.yml`: runtime dan automation.
@@ -163,4 +167,4 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 
 ## Session Handoff
 
-Project memory diselaraskan dengan `CODEX_PROJECT_CONTEXT.md` pada 25 Agustus 2026. Source code, dependency, database, deployment, dan nilai environment tidak diubah. Jalankan `npm ci` sebelum build berikutnya, lalu mulai task dengan membaca `AGENTS.md`, `docs/CURRENT_TASK.md`, dan `docs/FEATURE_BASELINE.md`.
+Dashboard produk segera expired dan bottom navigation ditambahkan pada 25 Agustus 2026. Targeted lint dan production build lulus; route dashboard terverifikasi server-rendered on demand dan merespons HTTP 200 secara lokal. Full lint project masih memiliki temuan lama yang dicatat di verification debt.

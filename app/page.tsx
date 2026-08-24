@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SubmitButton } from "@/components/SubmitButton";
+import { BottomNavigation } from "@/components/BottomNavigation";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -153,7 +154,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#eef6ff_28%,#f8fafc_55%,#ecfeff_100%)] px-4 py-5 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#eef6ff_28%,#f8fafc_55%,#ecfeff_100%)] px-4 pt-5 pb-36 sm:px-6 lg:px-8">
       <section className="mx-auto max-w-7xl">
         <div className="overflow-hidden rounded-[2.2rem] bg-slate-950 text-white shadow-2xl shadow-slate-300/60 ring-1 ring-white/10">
           <div className="relative px-5 py-7 sm:px-8 sm:py-10 lg:px-10">
@@ -446,6 +447,7 @@ export default async function HomePage({ searchParams }: PageProps) {
           </div>
         )}
       </section>
+      <BottomNavigation />
     </main>
   );
 }

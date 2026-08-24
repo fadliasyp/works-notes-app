@@ -8,11 +8,11 @@ Belum ada task aktif.
 
 ## Last Completed Work
 
-Mengintegrasikan catatan `CODEX_PROJECT_CONTEXT.md` ke project memory permanen.
+Menambahkan dashboard produk yang akan expired dan bottom navigation pada halaman utama.
 
 ## Goal
 
-Memastikan `docs/` dan `AGENTS.md` memuat keputusan produk, schema context, baseline mobile, dan status verifikasi terbaru tanpa menduplikasi catatan lama.
+Menampilkan produk dengan masa berlaku hari ini sampai lima hari ke depan, dikelompokkan per tempat, dengan gaya yang konsisten dengan halaman utama.
 
 ## Status
 
@@ -20,53 +20,50 @@ COMPLETED
 
 ## Completed
 
-- Memvalidasi catatan lama terhadap source, package manifest, Git history, dan konfigurasi saat ini.
-- Mencatat bahwa aplikasi bersifat internal, mobile-first, dan sengaja belum memakai auth.
-- Melindungi keputusan bahwa foto hanya berada di gallery tempat, bukan pada produk/maintenance asset.
-- Memasukkan tipe/relationship/cascade/unique-index dari project context ke database docs dengan penanda bahwa live schema belum terversi.
-- Memperbarui feature baseline untuk UI mobile, gallery, dan behavior Back HP yang sudah dinyatakan bagus/berjalan.
-- Memastikan semua nama environment yang diperlukan sekarang tersedia tanpa membaca nilainya.
+- Menambahkan route dinamis `/expiring-products` dengan query Supabase untuk rentang yang sama seperti notifikasi email.
+- Mengelompokkan produk per tempat dan menampilkan tanggal expiry, urgensi, quantity, volume, catatan, serta tautan detail tempat.
+- Menambahkan bottom navigation dua pilihan: Daftar Tempat dan Segera Expired.
+- Menambahkan empty state dan database error state.
+- Mempertahankan visual mobile-first halaman utama dan memberi ruang bawah agar konten tidak tertutup navbar.
 
 ## Files Modified
 
-- `README.md`
-- `AGENTS.md`
+- `app/page.tsx`
+- `app/expiring-products/page.tsx`
+- `components/BottomNavigation.tsx`
 - `docs/PROJECT_CONTEXT.md`
 - `docs/CURRENT_TASK.md`
 - `docs/FEATURE_BASELINE.md`
 - `docs/ARCHITECTURE.md`
-- `docs/DATABASE.md`
-- `docs/DECISIONS.md`
 - `docs/CHANGELOG.md`
 
 ## Findings
 
-- Source terbaru memang memakai Nodemailer/SMTP dan target `NOTIFICATION_EMAIL_TO`.
-- `.env.local` sudah memiliki seluruh nama variable yang diperlukan; nilai secret tidak diperiksa.
-- `nodemailer` ada di manifest dan lockfile, tetapi belum terpasang di `node_modules` lokal.
-- Catatan project menetapkan no-auth, mobile-first, central place gallery, dan threshold email lima hari sebagai keputusan yang disengaja.
+- `connection()` diperlukan agar Next.js tidak mem-prerender halaman yang memakai tanggal hari ini dan data Supabase terbaru.
+- Relasi embedded `places -> products` memungkinkan pengelompokan per toko tanpa dependency atau schema baru.
+- Rentang dashboard adalah inklusif dari hari ini sampai +5 hari; produk yang sudah lewat tidak ditampilkan, sama seperti cron email saat ini.
 
 ## Verification
 
-- `npm run lint`: FAILED — 4 errors dan 6 warnings, sama seperti pemeriksaan sebelumnya.
-- `npm run build`: FAILED — module `nodemailer` tidak ditemukan di `node_modules`.
-- Pencarian nama variable `.env.local`: seluruh variable aplikasi/SMTP ditemukan; nilainya tidak dibaca.
-- Tidak ada runtime CRUD/gallery/cron test dalam task dokumentasi ini.
+- Targeted ESLint untuk `components/BottomNavigation.tsx` dan `app/expiring-products/page.tsx`: PASSED.
+- `npm run build`: PASSED; `/expiring-products` terdeteksi sebagai dynamic route.
+- `npm run lint`: FAILED dengan 4 error dan 6 warning lama yang sama; file fitur baru tidak menambah temuan.
+- Runtime lokal `GET /expiring-products`: HTTP 200 dengan konfigurasi `.env.local` saat ini. Dev server hanya memberi warning fallback Google Fonts akibat akses network lokal.
 
 ## Decisions
 
-- Tidak mengubah source, dependency, database, deployment, atau environment.
-- Menerima catatan user sebagai bukti baseline untuk visual mobile, gallery, dan navigation behavior.
-- Tetap membedakan schema yang didokumentasikan dari schema live yang belum diekspor ke repository.
+- Tidak menambah dependency, tabel, migration, ataupun endpoint baru.
+- Memakai route terpisah agar halaman daftar tempat tetap fokus dan bottom navigation menjadi akses utama di mobile.
+- Menyamakan batas tanggal dashboard dengan cron email: hari ini sampai +5 hari.
 
 ## Next Steps
 
-Jalankan `npm ci` untuk menyinkronkan `node_modules`, kemudian ulangi `npm run build`. Perbaikan lint menunggu task terpisah.
+Uji visual dashboard pada perangkat HP. Perbaikan lint lama menunggu task terpisah.
 
 ## Blockers
 
-Build lokal terblokir oleh dependency `nodemailer` yang belum terpasang.
+Tidak ada blocker implementasi. Pemeriksaan visual melalui browser/perangkat HP belum dilakukan.
 
 ## Notes for Next Session
 
-`CODEX_PROJECT_CONTEXT.md` tetap dipertahankan sebagai catatan sumber. Project memory ringkas dan operasional berada di `AGENTS.md` serta `docs/`.
+Jika batas tanggal notifikasi email berubah, query dashboard harus diperbarui bersamaan agar keduanya tetap konsisten.

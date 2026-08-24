@@ -68,6 +68,29 @@ Foto produk sengaja dihapus. Jangan menambahkan upload/preview foto produk; guna
 
 **Verification:** Uji create/edit/delete dan tanggal kemarin, hari ini, +3, +4, +10, serta +11 hari.
 
+## Expiring Products Dashboard
+
+**Status:** WORKING / PROTECTED
+
+**Function:** Menampilkan produk yang masa berlakunya habis dari hari ini sampai lima hari ke depan, dikelompokkan berdasarkan tempat.
+
+**Protected behavior:**
+
+- Rentang tanggal inklusif hari ini sampai +5 hari, sama dengan cron email.
+- Hanya tempat yang memiliki produk dalam rentang tersebut yang ditampilkan.
+- Produk diurutkan berdasarkan tanggal expiry; tempat diurutkan berdasarkan nama.
+- Setiap produk menampilkan urgensi, tanggal, serta quantity, volume, dan catatan bila tersedia.
+- Bottom navigation menyediakan akses antara Daftar Tempat dan Segera Expired.
+- Halaman dihitung secara dinamis agar tanggal dan data Supabase tidak menjadi hasil build yang basi.
+
+**Do not break:** Mobile safe-area, ruang bawah konten, active navigation state, empty/error state, dan tautan menuju detail tempat.
+
+**Important files:** `app/expiring-products/page.tsx`, `components/BottomNavigation.tsx`, `app/page.tsx`.
+
+**Dependencies:** `places`, embedded relation `products`, dan Supabase anon client.
+
+**Verification:** Uji data pada tanggal hari ini, +1, +5, +6, dan tanggal lampau; pastikan hasil per tempat sama dengan rentang kandidat cron email.
+
 ## Maintenance Workflow
 
 **Status:** WORKING / PROTECTED; UI USER-APPROVED
