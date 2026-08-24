@@ -1,6 +1,6 @@
 # Works Notes App
 
-Works Notes App adalah aplikasi web pencatatan operasional untuk mengelola tempat kerja/restoran, produk beserta masa berlakunya, dokumentasi foto tempat, dan checklist maintenance berkala.
+Works Notes App adalah aplikasi web internal, mobile-first, untuk mengelola tempat kerja/restoran, produk beserta masa berlakunya, dokumentasi foto tempat, dan checklist maintenance berkala.
 
 ## Stack
 
@@ -42,6 +42,10 @@ NOTIFICATION_EMAIL_TO=
 
 `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` dipakai aplikasi. Variable server lainnya dipakai endpoint cron email. Workflow GitHub juga membutuhkan repository secrets `SUPABASE_URL` dan `SUPABASE_ANON_KEY`.
 
+## Akses dan Keamanan
+
+Project sengaja belum memakai login/auth pada tahap sekarang. Akibatnya, deployment yang URL-nya diketahui dapat diakses dan berpotensi diedit publik, bergantung pada policy Supabase. Jangan gunakan deployment untuk data sensitif sebelum akses dan RLS ditinjau.
+
 ## Development
 
 ```bash
@@ -57,7 +61,7 @@ npm run lint
 npm run build
 ```
 
-Belum ada test suite otomatis. Pada discovery 24 Agustus 2026, lint masih memiliki 4 error dan 6 warning. Build melewati kompilasi dan pemeriksaan TypeScript, lalu berhenti karena variable Supabase lokal belum tersedia. Detailnya dicatat di [project context](docs/PROJECT_CONTEXT.md).
+Belum ada test suite otomatis. Pada pemeriksaan 25 Agustus 2026, lint masih memiliki 4 error dan 6 warning. Build berhenti karena `nodemailer` sudah tercantum di manifest tetapi belum terpasang di `node_modules`; jalankan `npm ci` lalu ulangi build. Detailnya dicatat di [project context](docs/PROJECT_CONTEXT.md).
 
 ## Deployment
 

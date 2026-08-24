@@ -1,6 +1,6 @@
 # Decision Log
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 This log records decisions made during or after the documentation bootstrap. It does not invent rationale for historical implementation choices.
 
@@ -84,4 +84,85 @@ Source presence and commit messages do not prove correct runtime behavior.
 ### Consequences
 
 Current behavior is still protected as a regression baseline, while the documentation remains honest about confidence.
+
+## 2026-08-25 — No Authentication for the Current Stage
+
+### Status
+
+ACCEPTED
+
+### Decision
+
+Keep the application without login/auth until the user explicitly requests it.
+
+### Context
+
+`CODEX_PROJECT_CONTEXT.md` states that the app is internal and intentionally has no authentication. The resulting public-edit risk for a known deployment URL is understood for the current stage.
+
+### Reason
+
+This preserves the intentionally simple current workflow and avoids reintroducing removed auth files or dependencies.
+
+### Alternatives
+
+- Add application login and session handling now.
+- Restrict access only through external deployment controls.
+
+### Consequences
+
+Do not add auth speculatively. Do not treat the deployed app as suitable for sensitive data; Supabase RLS and deployment access remain security boundaries.
+
+## 2026-08-25 — Mobile-First UI and Back Navigation Are Protected
+
+### Status
+
+ACCEPTED
+
+### Decision
+
+Treat the existing mobile visual language, touch targets, unsaved-form guard, replace-navigation, and gallery Back-button behavior as a stable product baseline.
+
+### Context
+
+The project is primarily used on phones, and the project context records these behaviors as already good and working.
+
+### Reason
+
+Navigation history and gallery overlays are core usability behavior on mobile, not incidental styling.
+
+### Alternatives
+
+- Redesign desktop-first.
+- Replace custom browser-history handling without preserving behavior.
+
+### Consequences
+
+Browser-facing changes require mobile regression checks and must not trap users in form/tab/modal history.
+
+## 2026-08-25 — Photos Belong to the Place Gallery
+
+### Status
+
+ACCEPTED
+
+### Decision
+
+Keep photos centralized in the place gallery; do not restore product or maintenance-asset photo UI.
+
+### Context
+
+Individual item photo features were deliberately removed and replaced by a per-place gallery.
+
+### Reason
+
+This is the product model recorded in the project context and current Git history.
+
+### Alternatives
+
+- Restore product photos.
+- Restore maintenance-asset photos.
+
+### Consequences
+
+Legacy columns/buckets may remain for compatibility, but the main UI must not use them unless the user intentionally changes this decision.
 

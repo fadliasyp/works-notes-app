@@ -4,7 +4,7 @@ Last updated: 2026-08-25
 
 ## High-Level Architecture
 
-Works Notes App adalah satu aplikasi Next.js App Router. UI, reads, dan Server Actions berada dalam route tree yang sama. Supabase menjadi data/storage backend, sedangkan Nodemailer mengirim email melalui SMTP dari cron Route Handler.
+Works Notes App adalah aplikasi internal, mobile-first, berbasis Next.js App Router. UI, reads, dan Server Actions berada dalam route tree yang sama. Supabase menjadi data/storage backend, sedangkan Nodemailer mengirim email melalui SMTP dari cron Route Handler.
 
 ```text
 Browser
@@ -37,6 +37,7 @@ GitHub Actions -- anon REST ping --> Supabase /rest/v1/todos
   - `SubmitButton`: pending form state.
   - `ReplaceLink`: replace navigation pada detail tab.
 - Styling memakai Tailwind CSS utility classes dan global CSS minimal.
+- Visual baseline memakai gradient lembut biru/putih/emerald, card rounded besar, shadow halus, dan touch target yang nyaman di HP.
 - Geist dan Geist Mono dimuat melalui `next/font/google`.
 
 ## Routes
@@ -66,6 +67,8 @@ Tidak ada backend service terpisah. Backend-for-frontend dibentuk oleh:
 - Satu Route Handler untuk cron.
 
 UI Actions memakai singleton Supabase anon client dari `lib/supabase.ts`. Cron memakai service-role client dari `lib/supabase-admin.ts` dengan session persistence dimatikan.
+
+Source berada langsung di `app/`, `components/`, dan `lib/` tanpa folder `src/`. Struktur ini adalah baseline yang disengaja.
 
 ## API
 
@@ -99,14 +102,15 @@ Schema authoritative tidak tersedia. Lihat `docs/DATABASE.md`.
 
 ## Authentication and Authorization
 
-- Tidak ditemukan login, register, logout, session, OAuth, JWT, role, atau permission code.
+- Login/auth sengaja tidak digunakan pada tahap sekarang; jangan menambahkannya tanpa permintaan eksplisit.
 - UI memakai public anon key.
 - Cron memakai server-only service-role key dan bearer secret.
 - RLS/table policy/storage policy tidak tersimpan di repository dan harus dianggap belum diketahui.
+- Konsekuensi yang diterima saat ini: deployment dapat diedit publik jika URL diketahui dan policy Supabase mengizinkannya.
 
 ## Storage
 
-- Bucket aktif: `place-gallery-images` dengan public URL.
+- Bucket aktif dan didokumentasikan public: `place-gallery-images`.
 - Path gallery: `<placeId>/<generated-file-name>`.
 - Bucket `product-images` dan `maintenance-images` hanya masih direferensikan oleh cleanup legacy saat place dihapus.
 - Upload gallery adalah storage write diikuti table insert; transaksi lintas keduanya tidak tersedia.
@@ -114,7 +118,7 @@ Schema authoritative tidak tersedia. Lihat `docs/DATABASE.md`.
 ## External Services
 
 - Supabase Database/Storage.
-- SMTP email melalui Nodemailer.
+- SMTP email melalui Nodemailer. Catatan project menyebut Gmail SMTP; implementasi tidak mengunci provider.
 - Vercel deployment/cron berdasarkan `vercel.json`.
 - GitHub Actions untuk keep-alive.
 - Google Fonts saat build.
@@ -186,11 +190,13 @@ Vercel Cron
 - Gallery storage and metadata must be treated as one consistency boundary.
 - Maintenance session/check creation should be treated as one logical unit.
 - Validate the live schema/RLS before relying on cascade or ownership.
+- Do not add `src/`, auth, product photos, or maintenance-asset photos without explicit approval.
+- Preserve mobile-first layout and browser Back behavior.
 - Read the installed Next.js 16 guide before changing framework APIs.
 
 ## Risks
 
-- Security depends on unknown RLS/storage policy.
+- Tanpa login adalah keputusan saat ini, tetapi keamanan tetap bergantung pada RLS/storage policy yang belum terversi.
 - Several multi-step writes can leave partial state.
 - No test harness protects complex browser history behavior.
 - Failed email logs currently suppress retry.

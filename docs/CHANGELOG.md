@@ -13,6 +13,7 @@ All entries below are based on repository changes or verifiable Git history. Thi
 
 - Replaced the default Create Next App README with project-specific setup, environment, verification, deployment, and documentation guidance.
 - Updated expiry-email documentation and environment examples to SMTP/Nodemailer after user-verified delivery.
+- Integrated `CODEX_PROJECT_CONTEXT.md` into permanent docs: intentional no-auth scope, mobile-first visual/navigation baseline, centralized place gallery, and documented Supabase relationships/constraints.
 
 ### Security
 
@@ -21,6 +22,7 @@ All entries below are based on repository changes or verifiable Git history. Thi
 ### Documentation
 
 - Recorded current features, business rules, integration points, unknown schema details, verification results, and known risks.
+- Updated verification after environment completion: lint remains at 4 errors/6 warnings; build now reaches dependency resolution and reports missing local `nodemailer` installation.
 
 ## 2026-06-22
 

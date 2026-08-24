@@ -8,17 +8,18 @@ Last updated: 2026-08-25
 **Type:** Existing full-stack web application  
 **Purpose:** Menyimpan catatan operasional per tempat/restoran: data tempat, persediaan produk dan masa berlaku, dokumentasi foto, serta checklist maintenance berkala.
 
-Target pengguna aktual belum dijelaskan dalam repository. Berdasarkan istilah UI dan alur kerja, aplikasi tampaknya ditujukan untuk operator/pengelola beberapa tempat; hal ini masih perlu dikonfirmasi.
+Target pengguna adalah operator/pengelola internal restoran atau tempat kerja. Penggunaan utama dilakukan melalui HP, sehingga UI mobile-first adalah keputusan produk yang harus dipertahankan.
 
 ## Current Status
 
 Project memiliki implementasi end-to-end yang cukup lengkap, tetapi belum dapat dinyatakan production-ready atau `STABLE` dari bukti repository saja:
 
 - Branch saat discovery: `main`.
-- Source utama dibuat 21 Juni 2026 dan perubahan terakhir dalam history terjadi 22 Juni 2026.
+- Source utama dibuat 21 Juni 2026; history terbaru 25 Agustus 2026 mencakup migrasi email ke SMTP/Nodemailer dan project memory.
 - Tidak ada automated test suite.
 - `npm run lint` gagal dengan 4 error dan 6 warning.
-- `npm run build` berhasil compile dan melewati TypeScript, lalu gagal saat page-data collection karena environment Supabase lokal belum lengkap.
+- `.env.local` kini memuat seluruh nama variable yang dibutuhkan; nilainya tidak dibaca saat discovery.
+- `npm run build` pada 25 Agustus 2026 berhenti karena module `nodemailer` belum tersedia di `node_modules` meskipun sudah tercantum di manifest/lockfile.
 - Schema, migration, RLS policy, dan seed Supabase tidak tersimpan di repository.
 - Deployment yang benar-benar aktif dan perilaku terhadap database production belum diverifikasi.
 
@@ -26,17 +27,18 @@ Project memiliki implementasi end-to-end yang cukup lengkap, tetapi belum dapat 
 
 | Feature | Status | Evidence |
 | --- | --- | --- |
-| Daftar, cari, tambah, edit, hapus tempat | WORKING | Route, query, dan Server Actions tersedia; TypeScript lolos dalam build |
+| Mobile-first visual system | STABLE | Project context menyatakan UI utama sudah rapi dan mobile-first |
+| Daftar, cari, tambah, edit, hapus tempat | WORKING / PROTECTED | Route, query, dan Server Actions tersedia; UI dinyatakan sudah rapi |
 | Ringkasan detail tempat | WORKING | Produk, maintenance, dan preview gallery dibaca per `place_id` |
 | CRUD produk dan indikator masa berlaku | WORKING | Server Actions, validasi nama, dan badge expiry tersedia |
 | CRUD master barang maintenance | WORKING | Tambah/edit/hapus tersedia; barang baru disinkronkan ke sesi existing |
 | Sesi dan checklist maintenance | WORKING | Pembuatan snapshot checklist, edit sesi, hapus, dan toggle tersedia |
-| Gallery tempat | WORKING | Multi-upload, kompresi client, viewer, selection, dan bulk delete tersedia |
-| Toast, pending UI, dan unsaved-changes guard | WORKING | Komponen dipakai pada flow form dan history perbaikannya tersedia |
-| Email produk akan expired | WORKING | Endpoint dan schedule tersedia; pengiriman melalui SMTP sudah diverifikasi pengguna |
+| Gallery tempat | STABLE | Multi-upload, kompresi, viewer, selection/delete, dan Back HP dinyatakan sudah berjalan |
+| Toast, pending UI, dan unsaved-changes guard | STABLE | Perilaku feedback dan navigation dinyatakan sudah berjalan/rapi |
+| Email produk akan expired | WORKING / USER-VERIFIED DELIVERY | Endpoint dan schedule tersedia; pengiriman SMTP sudah diverifikasi pengguna |
 | Workflow keep-alive Supabase | UNKNOWN | Workflow tersedia tetapi bergantung pada tabel `todos` yang tidak digunakan di source lain |
 
-`WORKING` berarti implementasi ditemukan dan lolos pemeriksaan TypeScript, bukan bukti bahwa fitur sudah diuji terhadap database live.
+`STABLE` di tabel ini berasal dari catatan project/user mengenai perilaku yang sudah bagus dan harus dipertahankan. `WORKING` berarti implementasi ditemukan, tetapi seluruh skenario database live belum diuji.
 
 ## Current Work
 
@@ -47,7 +49,7 @@ Belum ada task development aktif setelah bootstrap dokumentasi ini.
 Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 
 1. Rotasi `CRON_SECRET` karena credential pernah tercatat di README dan masih mungkin ada di Git history.
-2. Lengkapi environment lokal dan verifikasi aplikasi terhadap Supabase.
+2. Jalankan `npm ci` agar `node_modules` sinkron dengan lockfile, lalu ulangi build.
 3. Selesaikan 4 lint errors dan tinjau 6 warnings.
 4. Simpan schema/migration/RLS/storage policy Supabase dalam repository.
 5. Verifikasi atau perbaiki workflow keep-alive yang membaca tabel `todos`.
@@ -71,18 +73,23 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 ## Technical Facts
 
 - Next.js 16.2.9 App Router dengan React Server Components sebagai default.
+- Aplikasi sengaja tidak memakai login/auth pada tahap sekarang.
+- Struktur source berada langsung di `app/`, `components/`, dan `lib/`; tidak memakai `src/`.
 - Mutasi UI memakai Server Actions yang colocated di file route.
 - Data UI memakai Supabase anon client; cron memakai service-role client server-side.
 - Hanya ada satu Route Handler publik: `GET /api/cron/expiring-products`, dilindungi bearer secret.
 - Tidak ada authentication/session/role/permission layer di source.
 - Toast diteruskan melalui query parameter lalu dibaca komponen client.
 - Gallery memakai Supabase public URL dan bucket `place-gallery-images`.
+- Email expiry dikirim oleh Nodemailer melalui SMTP; catatan project menyebut Gmail SMTP, sedangkan implementasi tetap provider-agnostic.
 - `next.config.ts` menaikkan Server Action body limit ke 20 MB.
 - Package manager yang terbukti adalah npm melalui `package-lock.json`.
 
 ## Constraints
 
 - Next.js lokal memiliki breaking changes; baca guide terkait di `node_modules/next/dist/docs/` sebelum mengubah kode.
+- Jangan menambahkan login, memindahkan source ke `src/`, atau mengaktifkan kembali foto produk/asset tanpa instruksi eksplisit.
+- UI harus tetap mobile-first dengan visual slate/blue/emerald, gradient lembut, card rounded besar, dan touch target yang nyaman.
 - Akses data yang aman bergantung pada RLS/storage policy Supabase yang belum tersedia di repository.
 - Serverless runtime diperlukan untuk Server Actions dan cron route; static export tidak memadai.
 - Build membutuhkan network untuk mengambil Geist dari Google Fonts dan environment Supabase yang valid.
@@ -93,7 +100,7 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 ### Security
 
 - Credential cron pernah ditulis langsung di README. Nilainya sudah dihapus dari current README, tetapi masih dapat berada di Git history; secret harus dirotasi.
-- Tidak ada app-level authentication atau authorization. Efektivitas RLS Supabase belum diketahui.
+- Tidak ada app-level authentication atau authorization secara sengaja untuk tahap sekarang. Risiko edit publik melalui URL sudah disadari; efektivitas RLS Supabase tetap belum diketahui.
 - Server Actions UI menggunakan anon key. Hidden form IDs bukan authorization boundary.
 
 ### Bugs / Behavior Risks
@@ -127,6 +134,7 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 - `lib/supabase.ts`: anon client.
 - `lib/supabase-admin.ts`: service-role client untuk cron.
 - `next.config.ts`, `vercel.json`, dan `.github/workflows/keep-supabase-alive.yml`: runtime dan automation.
+- `CODEX_PROJECT_CONTEXT.md`: catatan detail historis/product decisions yang telah diringkas ke project memory.
 
 ## External Services
 
@@ -149,7 +157,10 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 - Browser-back semantics pada gallery dan unsaved form.
 - Redirect replace, pending state, dan toast feedback setelah Server Actions.
 - Layout mobile-responsive yang telah menjadi fokus banyak commit.
+- Gaya visual mobile-first yang sudah disetujui.
+- Foto hanya berada di gallery tempat, bukan pada produk atau maintenance asset.
+- Threshold email expiry lima hari dan channel email.
 
 ## Session Handoff
 
-Bootstrap project memory selesai pada 24 Agustus 2026. Source code, dependency, database, deployment, dan perubahan `.gitignore` yang sudah ada tidak diubah. Mulai task berikutnya dengan membaca `AGENTS.md`, `docs/CURRENT_TASK.md`, dan `docs/FEATURE_BASELINE.md`, lalu konfirmasi akses/schema Supabase bila task menyentuh data.
+Project memory diselaraskan dengan `CODEX_PROJECT_CONTEXT.md` pada 25 Agustus 2026. Source code, dependency, database, deployment, dan nilai environment tidak diubah. Jalankan `npm ci` sebelum build berikutnya, lalu mulai task dengan membaca `AGENTS.md`, `docs/CURRENT_TASK.md`, dan `docs/FEATURE_BASELINE.md`.

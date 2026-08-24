@@ -1,13 +1,13 @@
 # Database
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 ## Status
 
 **Database:** Supabase PostgreSQL, accessed through `@supabase/supabase-js`.  
 **ORM:** None; Supabase query builder/PostgREST is used directly.
 
-No schema dump, migration, seed, generated database types, or Supabase config directory exists in the repository. Everything below is a **logical model inferred from source queries**, not an authoritative database definition.
+No schema dump, migration, seed, generated database types, or Supabase config directory exists in the repository. Model di bawah menggabungkan query source dengan schema yang dicatat dalam `CODEX_PROJECT_CONTEXT.md`. Tipe, cascade, default, dan unique index dari catatan tersebut tetap perlu dicocokkan dengan live Supabase karena belum tersedia sebagai migration yang dapat diverifikasi.
 
 ## Logical Models
 
@@ -15,102 +15,105 @@ No schema dump, migration, seed, generated database types, or Supabase config di
 
 | Field | Observed application type/use |
 | --- | --- |
-| `id` | string identifier |
-| `name` | required string in app |
-| `address` | nullable string |
-| `city_highlight` | nullable string |
-| `last_changed_at` | nullable timestamp string, updated by child mutations |
-| `created_at` | nullable timestamp string |
-| `updated_at` | nullable timestamp string |
+| `id` | UUID menurut project context |
+| `name` | text; required by app |
+| `address` | nullable text |
+| `city_highlight` | nullable text |
+| `last_changed_at` | timestamptz; updated by child mutations |
+| `created_at` | timestamptz |
+| `updated_at` | timestamptz |
 
 ### `products`
 
 | Field | Observed application type/use |
 | --- | --- |
-| `id` | string identifier |
-| `place_id` | parent place identifier |
-| `name` | required string in app |
-| `quantity` | nullable number |
-| `volume_value` | nullable number |
-| `volume_unit` | nullable string |
-| `expires_at` | nullable date string |
-| `note` | nullable string |
-| `created_at` | nullable timestamp string |
-| `updated_at` | nullable timestamp string |
+| `id` | UUID menurut project context |
+| `place_id` | UUID FK ke `places(id) ON DELETE CASCADE` menurut project context |
+| `name` | text; required by app |
+| `quantity` | nullable numeric |
+| `volume_value` | nullable numeric |
+| `volume_unit` | nullable text |
+| `expires_at` | nullable date |
+| `note` | nullable text |
+| `created_at` | timestamptz |
+| `updated_at` | timestamptz |
 | `image_path` | legacy cleanup reference; actual column existence needs confirmation |
 
 ### `maintenance_assets`
 
 | Field | Observed application type/use |
 | --- | --- |
-| `id` | string identifier |
-| `place_id` | parent place identifier |
-| `name` | required string in app |
-| `description` | nullable string |
-| `is_active` | nullable boolean; new records set true |
-| `sort_order` | nullable number; app defaults to 0 |
-| `created_at` | nullable timestamp string |
-| `updated_at` | nullable timestamp string |
+| `id` | UUID menurut project context |
+| `place_id` | UUID FK ke `places(id) ON DELETE CASCADE` menurut project context |
+| `name` | text; required by app |
+| `description` | nullable text |
+| `is_active` | boolean default true menurut project context |
+| `sort_order` | integer default 0 menurut project context |
+| `created_at` | timestamptz |
+| `updated_at` | timestamptz |
 | `image_path` | legacy cleanup/join reference; actual column existence needs confirmation |
 
 ### `maintenance_sessions`
 
 | Field | Observed application type/use |
 | --- | --- |
-| `id` | string identifier |
-| `place_id` | parent place identifier |
-| `title` | nullable string; app defaults to “Maintenance Bulanan” |
-| `maintenance_date` | nullable in returned type, required by app when writing |
-| `note` | nullable string |
-| `created_at` | nullable timestamp string |
-| `updated_at` | nullable timestamp string |
+| `id` | UUID menurut project context |
+| `place_id` | UUID FK ke `places(id) ON DELETE CASCADE` menurut project context |
+| `title` | nullable text; app defaults to “Maintenance Bulanan” |
+| `maintenance_date` | date; required by app when writing |
+| `note` | nullable text |
+| `created_at` | timestamptz |
+| `updated_at` | timestamptz |
 
 ### `maintenance_checks`
 
 | Field | Observed application type/use |
 | --- | --- |
-| `id` | string identifier |
-| `maintenance_session_id` | parent session identifier |
-| `maintenance_asset_id` | referenced asset identifier |
-| `is_checked` | nullable boolean |
-| `checked_at` | nullable timestamp string |
+| `id` | UUID menurut project context |
+| `maintenance_session_id` | UUID FK ke `maintenance_sessions(id) ON DELETE CASCADE` menurut project context |
+| `maintenance_asset_id` | UUID FK ke `maintenance_assets(id) ON DELETE CASCADE` menurut project context |
+| `is_checked` | boolean default false menurut project context |
+| `checked_at` | nullable timestamptz |
+| `created_at` | timestamptz menurut project context |
+| `updated_at` | timestamptz menurut project context |
 
-The app upserts on `maintenance_session_id,maintenance_asset_id`. A matching unique constraint is likely required for this code to work, but its existence is not proven by repository files.
+Project context mencatat unique constraint `(maintenance_session_id, maintenance_asset_id)`, sesuai conflict target yang dipakai source.
 
 ### `place_gallery_images`
 
 | Field | Observed application type/use |
 | --- | --- |
-| `id` | string identifier |
-| `place_id` | parent place identifier |
+| `id` | UUID primary key, default `gen_random_uuid()` menurut project context |
+| `place_id` | UUID not null FK ke `places(id) ON DELETE CASCADE` menurut project context |
 | `image_path` | required storage path in app flow |
 | `file_name` | nullable original/final filename |
 | `file_size` | nullable number |
 | `mime_type` | nullable string |
-| `created_at` | nullable timestamp string |
-| `updated_at` | nullable timestamp string |
+| `created_at` | timestamp default `now()` menurut project context |
+| `updated_at` | timestamp default `now()` menurut project context |
 
 ### `notification_logs`
 
 | Field | Observed application type/use |
 | --- | --- |
-| `product_id` | notified product identifier |
+| `product_id` | UUID product identifier menurut project context |
 | `channel` | written as `email` |
 | `target` | notification recipient |
 | `status` | written as `sent` or `failed` |
-| `sent_at` | nullable timestamp |
+| `sent_at` | nullable timestamptz |
 | `error_message` | nullable error text |
+| `created_at` | timestamptz menurut project context |
 | `notification_type` | written as `product_expiry` |
-| `expires_at_snapshot` | expiry value used for deduplication |
+| `expires_at_snapshot` | date used for deduplication |
 | `message` | email subject |
 
-An `id` or timestamps may exist but are not selected/written by current source; unknown.
+Project context mencatat unique index `(product_id, channel, target, notification_type, expires_at_snapshot)`. Kolom `id` tidak disebutkan dan tetap belum diketahui.
 
 ### `todos`
 
 Only referenced by `.github/workflows/keep-supabase-alive.yml` as a one-row REST query. Its schema and existence are unknown.
 
-## Inferred Relationships
+## Documented Relationships
 
 ```text
 places 1 ---- * products
@@ -124,7 +127,7 @@ maintenance_assets   1 ---- * maintenance_checks
 products 1 ---- * notification_logs (inferred from product_id)
 ```
 
-Foreign keys, deletion actions, nullability, and actual cardinality constraints require confirmation from Supabase.
+Relasi dan `ON DELETE CASCADE` di atas berasal dari project context dan konsisten dengan query application. Keberadaannya pada live database belum dapat diverifikasi dari repository.
 
 ## Ordering and Query Assumptions
 
@@ -140,11 +143,11 @@ Indexes supporting these access patterns are unknown.
 
 | Bucket | Current use |
 | --- | --- |
-| `place-gallery-images` | Active place gallery uploads and public reads |
+| `place-gallery-images` | Active public bucket untuk place gallery uploads/reads |
 | `product-images` | Legacy cleanup reference only |
 | `maintenance-images` | Legacy cleanup reference only |
 
-Bucket privacy, MIME/size policy, ownership policy, and lifecycle rules are not stored in the repository.
+Project context menyatakan bucket gallery public. MIME/size enforcement di Storage, ownership policy, dan lifecycle rules tetap belum terdokumentasi.
 
 ## Migrations and Seed
 
@@ -156,12 +159,17 @@ Bucket privacy, MIME/size policy, ownership policy, and lifecycle rules are not 
 
 ## RLS and Constraints
 
-The source mentions checking RLS when reads fail, but no policies are versioned. The following are unknown and must be inspected in Supabase before data/security work:
+Project context mendokumentasikan beberapa constraints:
+
+- Child tables memakai foreign key ke parent dengan `ON DELETE CASCADE`.
+- `maintenance_checks` unik per pasangan session/asset.
+- `notification_logs` unik per product/channel/target/type/expiry snapshot.
+- Gallery bucket bersifat public.
+
+Semua hal tersebut masih perlu dicocokkan dengan live Supabase. Source menyebut pemeriksaan RLS ketika reads gagal, tetapi tidak ada policies yang terversi. Hal berikut masih belum diketahui:
 
 - RLS enabled state and policies for every table.
 - Storage bucket policies.
-- Foreign keys and `ON DELETE` behavior.
-- Unique constraints, especially maintenance check pairs and notification deduplication.
 - Check constraints/enums for notification status/channel/type.
 - Timestamp defaults/triggers.
 - Numeric/date column types and bounds.

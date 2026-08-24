@@ -9,7 +9,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Project Identity
 
 - This is an existing operational notes web application, not a new scaffold.
-- It manages places/restaurants, expiring products, place galleries, and recurring maintenance checklists.
+- It is an internal, mobile-first app for places/restaurants, expiring products, place galleries, and recurring maintenance checklists.
+- Authentication is intentionally out of scope for the current stage unless the user explicitly requests it.
 - Preserve verified current behavior. Do not refactor unrelated code while completing a task.
 
 ## Required Context
@@ -43,6 +44,7 @@ Do not add a dependency when the platform, standard library, or an installed dep
 - `docs/`: persistent project memory.
 
 Keep the current colocated Server Actions unless a requested change gives a concrete reason to move them.
+Keep the current root structure (`app/`, `components/`, `lib/`); do not introduce `src/` unless the user explicitly approves a structural migration.
 
 ## Coding Rules
 
@@ -51,6 +53,7 @@ Keep the current colocated Server Actions unless a requested change gives a conc
 - Make the smallest change that fixes the root cause.
 - Do not implement speculative abstractions, broad cleanup, or unrelated modernization.
 - Preserve mobile-responsive behavior, pending states, toast redirects, browser-back behavior, and unsaved-form protection.
+- Preserve the approved mobile-first visual language: soft blue/white/emerald gradients, large rounded cards, subtle shadows, spacious touch targets, and a formal uncluttered layout.
 - Use Asia/Jakarta where the current product behavior explicitly formats operational dates.
 
 ## Database Rules
@@ -66,12 +69,22 @@ Keep the current colocated Server Actions unless a requested change gives a conc
 - `/api/cron/expiring-products` must remain protected by `Authorization: Bearer <CRON_SECRET>`.
 - Never expose or log secret values. Service-role access is server-only.
 - Treat all form data, route params, and request headers as untrusted and validate them on the server.
-- The UI has no application authentication layer in the repository. Do not claim access is secure without verifying Supabase RLS and deployment controls.
+- The lack of application login is intentional for the current stage. Do not add auth, middleware, login/logout routes, `@supabase/ssr`, or a server auth client unless explicitly requested.
+- A deployed URL can therefore be publicly editable. Do not describe the app as secure without verifying Supabase RLS and deployment controls.
 - Do not weaken storage validation, upload count/size limits, or same-place record filtering.
+
+## Project-Specific Rules
+
+- Product photos and maintenance-asset photos were deliberately removed. Do not restore their upload/preview UI; use the place gallery instead.
+- Keep expiry email notification at five days unless the user requests a policy change.
+- Keep email as the notification channel; do not add WhatsApp without an explicit request.
+- Keep `UnsavedChangesGuard`, replace-navigation for detail tabs and successful actions, and gallery Back-button behavior.
+- Do not remove legacy database columns or storage buckets without explicit approval and live-schema verification.
 
 ## Testing Rules
 
 - Run the smallest relevant check, then `npm run lint` and `npm run build` for material changes when the environment permits.
+- For browser-facing changes, manually cover the mobile flows listed in `CODEX_PROJECT_CONTEXT.md` when a runnable environment is available.
 - Do not claim a check passed unless it was run successfully.
 - There is currently no automated test suite. Add a focused test only when a non-trivial behavior change needs regression protection.
 - Record environment-caused verification failures separately from source failures.

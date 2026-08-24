@@ -4,13 +4,23 @@ Last updated: 2026-08-25
 
 ## Baseline Status
 
-Belum ada fitur yang dapat diklasifikasikan `STABLE` berdasarkan bukti repository saja. Tidak ada automated tests atau hasil runtime terhadap Supabase live.
+Catatan project memberikan bukti user-level bahwa visual mobile, gallery, dan behavior navigasi/Back HP sudah bagus dan berjalan. Area tersebut kini menjadi `STABLE / PROTECTED`. CRUD lain tetap `WORKING / PROTECTED` sampai seluruh alur database live diuji.
 
-Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan TypeScript lolos, dan perilaku saat ini harus dipertahankan sampai pengguna atau test memberikan baseline yang lebih kuat.
+## Mobile-First Visual System
+
+**Status:** STABLE / USER-APPROVED
+
+**Protected behavior:** Background gradient biru/putih/emerald yang lembut, card rounded besar, shadow halus, warna slate/blue/emerald, tombol besar, layout formal-modern yang tidak ramai, dan kenyamanan penggunaan HP.
+
+**Do not break:** Jangan mengubah aplikasi menjadi desktop-first atau mengganti visual language secara menyeluruh tanpa permintaan pengguna.
+
+**Important files:** Seluruh route UI di `app/`, terutama `app/page.tsx`, `app/restaurants/[id]/page.tsx`, dan `app/globals.css`.
+
+**Verification:** Periksa viewport HP pada seluruh checklist manual di `CODEX_PROJECT_CONTEXT.md`.
 
 ## Place Management
 
-**Status:** WORKING / PROTECTED
+**Status:** WORKING / PROTECTED; UI USER-APPROVED
 
 **Function:** Menampilkan, mencari, menambah, mengedit, dan menghapus tempat.
 
@@ -36,7 +46,7 @@ Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan
 
 ## Product and Expiry Tracking
 
-**Status:** WORKING / PROTECTED
+**Status:** WORKING / PROTECTED; UI USER-APPROVED
 
 **Function:** CRUD produk per tempat, menyimpan quantity/volume/expiry/note, dan menampilkan urgency badge.
 
@@ -50,6 +60,8 @@ Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan
 
 **Do not break:** Nullable numeric/text handling, date-only input, note, badge boundaries, dan toast redirects.
 
+Foto produk sengaja dihapus. Jangan menambahkan upload/preview foto produk; gunakan gallery tempat.
+
 **Important files:** `app/restaurants/[id]/page.tsx`, `app/restaurants/[id]/products/new/page.tsx`, `app/restaurants/[id]/products/[productId]/edit/page.tsx`.
 
 **Dependencies:** `products`, `places`, `date-fns`.
@@ -58,7 +70,7 @@ Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan
 
 ## Maintenance Workflow
 
-**Status:** WORKING / PROTECTED
+**Status:** WORKING / PROTECTED; UI USER-APPROVED
 
 **Function:** Mengelola master asset, membuat sesi bulanan, membuat checklist snapshot, dan menandai hasil pengecekan.
 
@@ -72,6 +84,8 @@ Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan
 
 **Do not break:** Sinkronisasi asset/check, composite upsert behavior, urutan asset, checked count, dan tab `?tab=maintenance`.
 
+Foto maintenance asset sengaja dihapus. Jangan menambahkan upload/preview foto asset; gunakan gallery tempat.
+
 **Important files:** `app/restaurants/[id]/maintenance-assets/page.tsx`, `app/restaurants/[id]/maintenance/new/page.tsx`, `app/restaurants/[id]/maintenance/[maintenanceId]/edit/page.tsx`, `app/restaurants/[id]/page.tsx`.
 
 **Dependencies:** `maintenance_assets`, `maintenance_sessions`, `maintenance_checks`, `places`.
@@ -80,7 +94,7 @@ Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan
 
 ## Place Gallery
 
-**Status:** WORKING / PROTECTED
+**Status:** STABLE / USER-VERIFIED
 
 **Function:** Menyimpan dokumentasi foto per tempat dengan multi-upload, viewer, selection, dan bulk delete.
 
@@ -103,7 +117,7 @@ Fitur di bawah berstatus `WORKING / PROTECTED`: implementasinya ada, pemeriksaan
 
 ## Navigation and Form Feedback
 
-**Status:** WORKING / PROTECTED
+**Status:** STABLE / USER-VERIFIED
 
 **Function:** Memberi pending UI, toast, replace-navigation, dan peringatan perubahan form yang belum disimpan.
 
