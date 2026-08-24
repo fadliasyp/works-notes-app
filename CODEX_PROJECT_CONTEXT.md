@@ -29,7 +29,7 @@ Stack:
 - Tailwind CSS.
 - Supabase Database.
 - Supabase Storage.
-- Resend untuk email notification.
+- Gmail SMTP untuk email notification.
 - Vercel untuk deploy dan Cron Job.
 - Tidak memakai login/auth untuk saat ini.
 
@@ -392,7 +392,10 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 
-RESEND_API_KEY
+SMTP_HOST
+SMTP_PORT
+SMTP_USER
+SMTP_PASS
 NOTIFICATION_EMAIL_TO
 
 CRON_SECRET
@@ -455,7 +458,7 @@ Cron harus:
   Authorization: Bearer ${CRON_SECRET}
   ```
 - Ambil produk dengan `expires_at` dari hari ini sampai 5 hari ke depan.
-- Kirim email via Resend.
+- Kirim email via Gmail SMTP.
 - Simpan log ke `notification_logs`.
 - Tidak mengirim ulang produk yang sudah pernah dikirim untuk `expires_at_snapshot` yang sama.
 
