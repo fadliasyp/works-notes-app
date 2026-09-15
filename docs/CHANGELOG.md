@@ -13,6 +13,7 @@ All entries below are based on repository changes or verifiable Git history. Thi
 
 ### Changed
 
+- Expanded the expiry dashboard to include all products that are already expired while retaining the +5-day upper limit; the email notification window is unchanged.
 - Replaced the default Create Next App README with project-specific setup, environment, verification, deployment, and documentation guidance.
 - Updated expiry-email documentation and environment examples to SMTP/Nodemailer after user-verified delivery.
 - Integrated `CODEX_PROJECT_CONTEXT.md` into permanent docs: intentional no-auth scope, mobile-first visual/navigation baseline, centralized place gallery, and documented Supabase relationships/constraints.

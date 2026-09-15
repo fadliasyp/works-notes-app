@@ -88,7 +88,6 @@ export default async function ExpiringProductsPage() {
       )
     `,
     )
-    .gte("products.expires_at", today)
     .lte("products.expires_at", fiveDaysLater)
     .order("name", { ascending: true })
     .order("expires_at", {
@@ -138,12 +137,12 @@ export default async function ExpiringProductsPage() {
                 </div>
 
                 <h1 className="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-                  Produk Segera Expired
+                  Produk Expired & Segera Expired
                 </h1>
 
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                  Produk yang masa berlakunya habis mulai hari ini sampai lima
-                  hari ke depan, sama dengan rentang notifikasi email.
+                  Semua produk yang sudah expired, ditambah produk yang akan
+                  expired sampai lima hari ke depan.
                 </p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -173,13 +172,13 @@ export default async function ExpiringProductsPage() {
                     <CalendarDays size={24} />
                   </div>
                   <p className="mt-4 text-xs font-bold uppercase tracking-wide text-slate-400">
-                    Rentang Pantauan
+                    Batas Pantauan
                   </p>
                   <p className="mt-2 text-lg font-black text-slate-950">
-                    {formatDate(today)}
+                    Semua yang sudah expired
                   </p>
                   <p className="mt-1 text-sm font-bold text-orange-600">
-                    sampai {formatDate(fiveDaysLater)}
+                    hingga {formatDate(fiveDaysLater)}
                   </p>
                 </div>
               </div>
@@ -237,7 +236,9 @@ export default async function ExpiringProductsPage() {
                   {place.products.map((product) => {
                     const daysLeft = getDaysLeft(product.expires_at, today);
                     const expiryLabel =
-                      daysLeft === 0
+                      daysLeft < 0
+                        ? `Expired ${Math.abs(daysLeft)} hari lalu`
+                        : daysLeft === 0
                         ? "Hari ini"
                         : daysLeft === 1
                           ? "Besok"
@@ -318,10 +319,10 @@ export default async function ExpiringProductsPage() {
               <Package size={30} />
             </div>
             <h2 className="mt-5 text-xl font-black text-slate-900">
-              Tidak ada produk yang segera expired
+              Tidak ada produk expired
             </h2>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Belum ada produk dengan masa berlaku dari hari ini sampai lima
+              Belum ada produk yang sudah expired atau akan expired dalam lima
               hari ke depan.
             </p>
           </div>

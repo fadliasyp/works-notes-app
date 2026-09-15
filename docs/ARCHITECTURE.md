@@ -1,6 +1,6 @@
 # Architecture
 
-Last updated: 2026-08-25
+Last updated: 2026-09-15
 
 ## High-Level Architecture
 
@@ -46,7 +46,7 @@ GitHub Actions -- anon REST ping --> Supabase /rest/v1/todos
 | Route | Responsibility |
 | --- | --- |
 | `/` | List/search/delete tempat |
-| `/expiring-products` | Produk yang expired hari ini sampai +5 hari, dikelompokkan per tempat |
+| `/expiring-products` | Seluruh produk yang sudah expired dan produk sampai +5 hari ke depan, dikelompokkan per tempat |
 | `/restaurants/new` | Create tempat |
 | `/restaurants/[id]` | Detail, products, maintenance, gallery preview |
 | `/restaurants/[id]/edit` | Edit tempat |
@@ -183,7 +183,7 @@ Vercel Cron
 ```text
 Open /expiring-products
   --> dynamic Server Component
-  --> places dengan embedded products expiry hari ini..+5 hari
+  --> places dengan embedded products expiry tanpa batas bawah..+5 hari
   --> urutkan tempat dan tanggal expiry
   --> render card per tempat dan produk
 ```

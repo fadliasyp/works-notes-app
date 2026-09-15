@@ -1,6 +1,6 @@
 # Feature Baseline
 
-Last updated: 2026-08-25
+Last updated: 2026-09-15
 
 ## Baseline Status
 
@@ -72,11 +72,12 @@ Foto produk sengaja dihapus. Jangan menambahkan upload/preview foto produk; guna
 
 **Status:** WORKING / PROTECTED
 
-**Function:** Menampilkan produk yang masa berlakunya habis dari hari ini sampai lima hari ke depan, dikelompokkan berdasarkan tempat.
+**Function:** Menampilkan seluruh produk yang sudah expired serta produk yang akan expired sampai lima hari ke depan, dikelompokkan berdasarkan tempat.
 
 **Protected behavior:**
 
-- Rentang tanggal inklusif hari ini sampai +5 hari, sama dengan cron email.
+- Batas atas tanggal inklusif sampai +5 hari; tidak ada batas bawah agar seluruh produk yang sudah expired tetap terkumpul.
+- Cron email tidak berubah dan tetap hanya memilih produk dari hari ini sampai +5 hari.
 - Hanya tempat yang memiliki produk dalam rentang tersebut yang ditampilkan.
 - Produk diurutkan berdasarkan tanggal expiry; tempat diurutkan berdasarkan nama.
 - Setiap produk menampilkan urgensi, tanggal, serta quantity, volume, dan catatan bila tersedia.
@@ -89,7 +90,7 @@ Foto produk sengaja dihapus. Jangan menambahkan upload/preview foto produk; guna
 
 **Dependencies:** `places`, embedded relation `products`, dan Supabase anon client.
 
-**Verification:** Uji data pada tanggal hari ini, +1, +5, +6, dan tanggal lampau; pastikan hasil per tempat sama dengan rentang kandidat cron email.
+**Verification:** Uji data pada tanggal lampau, hari ini, +1, +5, dan +6; tanggal lampau sampai +5 harus tampil, sedangkan +6 tidak.
 
 ## Maintenance Workflow
 

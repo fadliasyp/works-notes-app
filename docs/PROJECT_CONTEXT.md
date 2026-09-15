@@ -1,6 +1,6 @@
 # Project Context
 
-Last updated: 2026-08-25
+Last updated: 2026-09-15
 
 ## Project Overview
 
@@ -36,7 +36,7 @@ Project memiliki implementasi end-to-end yang cukup lengkap, tetapi belum dapat 
 | Gallery tempat | STABLE | Multi-upload, kompresi, viewer, selection/delete, dan Back HP dinyatakan sudah berjalan |
 | Toast, pending UI, dan unsaved-changes guard | STABLE | Perilaku feedback dan navigation dinyatakan sudah berjalan/rapi |
 | Email produk akan expired | WORKING / USER-VERIFIED DELIVERY | Endpoint dan schedule tersedia; pengiriman SMTP sudah diverifikasi pengguna |
-| Dashboard produk segera expired | WORKING / PROTECTED | Route dinamis menampilkan produk hari ini sampai +5 hari per tempat dan dapat dibuka dari bottom navigation |
+| Dashboard produk expired | WORKING / PROTECTED | Route dinamis menampilkan seluruh produk yang sudah expired serta produk sampai +5 hari ke depan per tempat |
 | Workflow keep-alive Supabase | UNKNOWN | Workflow tersedia tetapi bergantung pada tabel `todos` yang tidak digunakan di source lain |
 
 `STABLE` di tabel ini berasal dari catatan project/user mengenai perilaku yang sudah bagus dan harus dipertahankan. `WORKING` berarti implementasi ditemukan, tetapi seluruh skenario database live belum diuji.
@@ -62,7 +62,7 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 - Produk memiliki nama wajib; quantity, volume, unit, expiry date, dan catatan bersifat opsional.
 - Badge expiry: lewat tanggal = merah/expired; 0–3 hari = merah; 4–10 hari = oranye; lebih dari 10 hari = hijau.
 - Endpoint email memilih produk dari hari ini sampai lima hari ke depan, lalu menghindari pengiriman ulang berdasarkan kombinasi produk dan snapshot tanggal expiry.
-- Dashboard expiry memakai rentang tanggal yang sama dengan email dan mengelompokkan produk berdasarkan tempat.
+- Dashboard expiry mengelompokkan seluruh produk yang sudah expired serta produk sampai +5 hari ke depan berdasarkan tempat; cron email tetap hanya memakai hari ini sampai +5 hari.
 - Maintenance baru memakai judul default “Maintenance Bulanan” dan tanggal wajib.
 - Saat sesi maintenance dibuat, semua master asset aktif disalin menjadi checklist unchecked.
 - Saat master asset baru dibuat, checklist unchecked ditambahkan ke seluruh sesi maintenance tempat tersebut.
@@ -133,7 +133,7 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 - `components/PlaceGalleryClient.tsx`: kompresi, selection, viewer, dan browser history gallery.
 - `components/UnsavedChangesGuard.tsx`: perlindungan perubahan form.
 - `app/api/cron/expiring-products/route.ts`: query expiry, email, dan notification logs.
-- `app/expiring-products/page.tsx`: dashboard produk yang expired dalam 0–5 hari, dikelompokkan per tempat.
+- `app/expiring-products/page.tsx`: dashboard seluruh produk yang sudah expired dan produk sampai +5 hari ke depan, dikelompokkan per tempat.
 - `components/BottomNavigation.tsx`: navigasi utama mobile antara daftar tempat dan dashboard expiry.
 - `lib/supabase.ts`: anon client.
 - `lib/supabase-admin.ts`: service-role client untuk cron.
@@ -167,4 +167,4 @@ Prioritas perlu dikonfirmasi pengguna. Kandidat berbasis bukti discovery:
 
 ## Session Handoff
 
-Dashboard produk segera expired dan bottom navigation ditambahkan pada 25 Agustus 2026. Targeted lint dan production build lulus; route dashboard terverifikasi server-rendered on demand dan merespons HTTP 200 secara lokal. Full lint project masih memiliki temuan lama yang dicatat di verification debt.
+Dashboard produk expiry kini mengumpulkan seluruh produk yang sudah expired serta produk sampai +5 hari ke depan. Aturan cron email tetap hari ini sampai +5 hari.
